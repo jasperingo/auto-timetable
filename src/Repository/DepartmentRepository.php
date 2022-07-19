@@ -16,6 +16,11 @@ class DepartmentRepository extends ServiceEntityRepository {
     $this->getEntityManager()->flush();
   }
 
+  public function existsById(int $id): bool {
+    $department = $this->find($id);
+    return $department !== null;
+  }
+
   public function existsByName(string $name): bool {
     $department = $this->findOneBy(['name' => $name]);
     return $department !== null;

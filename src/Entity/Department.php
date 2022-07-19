@@ -7,7 +7,9 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\PersistentCollection;
 
 #[Entity(DepartmentRepository::class), Table('departments')]
 class Department {
@@ -23,4 +25,7 @@ class Department {
 
   #[Column(type: 'string')]
   public string $code;
+
+  #[OneToMany('department', targetEntity: Staff::class)]
+  public PersistentCollection $staffs;
 }

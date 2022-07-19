@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use DateTime;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\Entity;
 use App\Repository\StaffRepository;
@@ -40,6 +42,12 @@ class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
 	
 	#[Column(type: 'datetime', nullable: false)]
 	public DateTime $createdAt;
+
+  #[
+    JoinColumn('departmentId'),
+    ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'staffs'),
+  ]
+  public Department $department;
 
   public function getPassword(): ?string {
     return $this->password;

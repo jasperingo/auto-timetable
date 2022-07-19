@@ -3,10 +3,12 @@ namespace App\Controller;
 
 use DateTime;
 use App\Entity\Staff;
-use App\Entity\StaffRole;
+use App\Security\JwtAuth;
+use App\Security\VoterAction;
 use App\Dto\CreateStaffDto;
 use App\Dto\ValidationErrorDto;
 use App\Repository\StaffRepository;
+use App\Repository\DepartmentRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,11 +25,16 @@ class StaffController extends AbstractController {
     private readonly StaffRepository $staffRepository,
     private readonly ValidatorInterface $validator,
     private readonly SerializerInterface $serializer,
+    private readonly DepartmentRepository $departmentRepository,
     private readonly UserPasswordHasherInterface $passwordHasher,
   ) {}
 
-  #[Route('', name: 'create', methods: ['POST'])]
+  #[Route('', name: 'create', methods: ['POST']), JwtAuth]
   public function create(Request $request): JsonResponse  {
+    $staff = new Staff;
+
+    $this->denyAccessUnlessGranted(VoterAction::CREATE, $staff);
+
     $staffDto = $this->serializer->deserialize(
       $request->getContent(),
       CreateStaffDto::class,
@@ -41,14 +48,15 @@ class StaffController extends AbstractController {
       return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
-    $staff = new Staff;
-    $staff->role = StaffRole::Admin;
+    $staff->role = $staffDto->role;
     $staff->createdAt = new DateTime;
     $staff->title = $staffDto->title;
-    $staff->firstName = $staffDto->firstName;
     $staff->lastName = $staffDto->lastName;
+    $staff->firstName = $staffDto->firstName;
     $staff->staffNumber = $staffDto->staffNumber;
     $staff->password = $this->passwordHasher->hashPassword($staff, $staffDto->password);
+
+    $staff->department = $this->departmentRepository->find($staffDto->departmentId);
 
     $this->staffRepository->save($staff);
 
