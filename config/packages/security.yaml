@@ -5,13 +5,32 @@ security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         users_in_memory: { memory: null }
+        app_staff_by_staff_number_provider:
+            entity:
+                class: App\Entity\Staff
+                property: staffNumber
+        app_staff_provider:
+            entity:
+                class: App\Entity\Staff
+                property: id
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        staff_login:
+            pattern: ^/v1/auth/staff
+            provider: app_staff_by_staff_number_provider
+            stateless: true
+            custom_authenticators:
+                - App\Security\StaffPasswordAuthenticator
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_staff_provider
+            stateless: true
+            custom_authenticators:
+                - App\Security\JwtAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

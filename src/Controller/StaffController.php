@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-#[Route('/staff', name: 'staff_')]
+#[Route('/staffs', name: 'staff_')]
 class StaffController extends AbstractController {
   public function __construct(
     private readonly StaffRepository $staffRepository,

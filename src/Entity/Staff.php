@@ -9,9 +9,10 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Entity(StaffRepository::class), Table('staffs')]
-class Staff implements PasswordAuthenticatedUserInterface {
+class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
   #[
 		Id, 
 		Column('id', 'integer'),
@@ -42,5 +43,17 @@ class Staff implements PasswordAuthenticatedUserInterface {
 
   public function getPassword(): ?string {
     return $this->password;
+  }
+
+  public function getRoles(): array {
+    return array_column(StaffRole::cases(), 'value');
+  }
+
+  public function eraseCredentials() {
+    // TODO: Implement eraseCredentials() method.
+  }
+
+  public function getUserIdentifier(): string {
+    return $this->staffNumber;
   }
 }
