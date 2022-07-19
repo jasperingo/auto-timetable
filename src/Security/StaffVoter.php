@@ -30,6 +30,20 @@ class StaffVoter extends Voter {
       return true;
     }
 
+    if (
+      $attribute === VoterAction::READ &&
+      $user instanceof Staff
+    ) {
+      return true;
+    }
+
+    if (
+      $attribute === VoterAction::READ_MANY &&
+      $user instanceof Staff
+    ) {
+      return true;
+    }
+
     return false;
   }
 }

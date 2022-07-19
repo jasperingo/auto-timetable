@@ -108,6 +108,43 @@ class StaffController extends AbstractController {
 
     $this->staffRepository->save($staff);
 
-    return new JsonResponse(['data' => $staff], Response::HTTP_OK);
+    return new JsonResponse(['data' => $staff]);
+  }
+
+  #[
+    Route(
+      '/{id}',
+      name: 'read',
+      requirements: ['id' => '\d+'],
+      methods: ['GET']
+    ),
+    JwtAuth
+  ]
+  public function read(int $id): JsonResponse {
+    $staff = $this->staffRepository->find($id);
+
+    if ($staff === null) {
+      return new JsonResponse(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::READ, $staff);
+
+    return new JsonResponse(['data' => $staff]);
+  }
+
+  #[
+    Route(
+      '',
+      name: 'read-many',
+      methods: ['GET']
+    ),
+    JwtAuth
+  ]
+  public function readMany(): JsonResponse {
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, new Staff);
+
+    $staffs = $this->staffRepository->findAll();
+
+    return new JsonResponse(['data' => $staffs]);
   }
 }
