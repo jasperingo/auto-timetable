@@ -17,10 +17,6 @@ class PermittedRoleValidator extends ConstraintValidator {
 
     $user = (object) $this->security->getUser();
 
-    if ($user->role === StaffRole::Admin) {
-      return true;
-    }
-
     if (
       $user->role === StaffRole::Invigilator ||
       ($user->role === StaffRole::ExamOfficer && $value !== StaffRole::Invigilator)

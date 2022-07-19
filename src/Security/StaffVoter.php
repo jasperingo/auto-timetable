@@ -22,6 +22,14 @@ class StaffVoter extends Voter {
       return true;
     }
 
+    if (
+      $attribute === VoterAction::UPDATE &&
+      $user instanceof Staff &&
+      $subject->id === $user->id
+    ) {
+      return true;
+    }
+
     return false;
   }
 }

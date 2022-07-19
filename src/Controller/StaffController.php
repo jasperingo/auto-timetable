@@ -2,11 +2,13 @@
 namespace App\Controller;
 
 use DateTime;
+use Exception;
 use App\Entity\Staff;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
 use App\Dto\CreateStaffDto;
 use App\Dto\ValidationErrorDto;
+use App\Dto\UpdateStaffPasswordDto;
 use App\Repository\StaffRepository;
 use App\Repository\DepartmentRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,11 +37,15 @@ class StaffController extends AbstractController {
 
     $this->denyAccessUnlessGranted(VoterAction::CREATE, $staff);
 
-    $staffDto = $this->serializer->deserialize(
-      $request->getContent(),
-      CreateStaffDto::class,
-      JsonEncoder::FORMAT,
-    );
+    try {
+      $staffDto = $this->serializer->deserialize(
+        $request->getContent(),
+        CreateStaffDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $staffDto = new CreateStaffDto;
+    }
 
     $errors = $this->validator->validate($staffDto);
 
@@ -61,5 +67,47 @@ class StaffController extends AbstractController {
     $this->staffRepository->save($staff);
 
     return new JsonResponse(['data' => $staff], Response::HTTP_CREATED);
+  }
+
+  #[
+    Route(
+      '/{id}/password',
+      name: 'update_password',
+      requirements: ['id' => '\d+'],
+      methods: ['PUT']
+    ),
+    JwtAuth
+  ]
+  public function updatePassword(Request $request, int $id): JsonResponse {
+    $staff = $this->staffRepository->find($id);
+
+    if ($staff === null) {
+      return new JsonResponse(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::UPDATE, $staff);
+
+    try {
+      $passwordDto = $this->serializer->deserialize(
+        $request->getContent(),
+        UpdateStaffPasswordDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $passwordDto = new UpdateStaffPasswordDto;
+    }
+
+    $errors = $this->validator->validate($passwordDto);
+
+    if (count($errors) > 0) {
+      $errorsList = ValidationErrorDto::listOf($errors);
+      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+    }
+
+    $staff->password = $this->passwordHasher->hashPassword($staff, $passwordDto->password);
+
+    $this->staffRepository->save($staff);
+
+    return new JsonResponse(['data' => $staff], Response::HTTP_OK);
   }
 }
