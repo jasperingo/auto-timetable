@@ -5,6 +5,7 @@ use DateTime;
 use App\Entity\Staff;
 use App\Entity\StaffRole;
 use App\Dto\CreateStaffDto;
+use App\Dto\ValidationErrorDto;
 use App\Repository\StaffRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -36,14 +37,7 @@ class StaffController extends AbstractController {
     $errors = $this->validator->validate($staffDto);
 
     if (count($errors) > 0) {
-      $errorsList = [];
-      foreach ($errors as $error) {
-        $errorsList[] = [
-          'name' => $error->getPropertyPath(),
-          'value' => $error->getInvalidValue(),
-          'message' => $error->getMessage(),
-        ];
-      }
+      $errorsList = ValidationErrorDto::listOf($errors);
       return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 

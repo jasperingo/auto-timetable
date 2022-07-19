@@ -3,22 +3,26 @@
 namespace App\Repository;
 
 use App\Entity\Department;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class DepartmentRepository extends ServiceEntityRepository {
-  public function __construct(ManagerRegistry $registry)
-  {
-    parent::__construct($registry, DepartmentRepository::class);
+  public function __construct(ManagerRegistry $registry) {
+    parent::__construct($registry, Department::class);
   }
 
-  public function save(Department $staff) {
-    $this->getEntityManager()->persist($staff);
+  public function save(Department $department) {
+    $this->getEntityManager()->persist($department);
     $this->getEntityManager()->flush();
   }
 
-  public function existsByStaffNumber(string $staffNumber): bool {
-    $staff = $this->findOneBy(['staffNumber' => $staffNumber]);
-    return $staff !== null;
+  public function existsByName(string $name): bool {
+    $department = $this->findOneBy(['name' => $name]);
+    return $department !== null;
+  }
+
+  public function existsByCode(string $code): bool {
+    $department = $this->findOneBy(['code' => $code]);
+    return $department !== null;
   }
 }

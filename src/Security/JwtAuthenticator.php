@@ -4,10 +4,13 @@ namespace App\Security;
 use function strlen;
 use function strtr;
 use function substr;
+use ReflectionMethod;
+use ReflectionException;
 use App\Service\JwtService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -20,14 +23,19 @@ class JwtAuthenticator extends AbstractAuthenticator {
   public function __construct(private readonly JwtService $jwtService) {}
 
   public function supports(Request $request): ?bool {
-    return true;
+    try {
+      $controller = new ReflectionMethod($request->attributes->get('_controller'));
+      return count($controller->getAttributes(JwtAuth::class)) > 0;
+    } catch (ReflectionException $e) {
+      throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 
   public function authenticate(Request $request): Passport {
     $authHeader = $request->headers->get('Authorization');
 
     if (null === $authHeader) {
-      throw new CustomUserMessageAuthenticationException('No JWT token provided');
+      throw new CustomUserMessageAuthenticationException("No JWT token provided");
     }
 
     $jwtToken = substr($authHeader, strlen('Bearer '));

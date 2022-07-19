@@ -8,13 +8,11 @@ use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class UniqueStaffNumberValidator extends ConstraintValidator {
-
   public function __construct(
-    private StaffRepository $staffRepository,
+    private readonly StaffRepository $staffRepository,
   ) {}
 
-  public function validate(mixed $value, Constraint $constraint)
-  {
+  public function validate(mixed $value, Constraint $constraint) {
     if (!$constraint instanceof UniqueStaffNumber) {
       throw new UnexpectedTypeException($constraint, UniqueStaffNumber::class);
     }

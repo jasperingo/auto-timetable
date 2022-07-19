@@ -2,6 +2,7 @@
 namespace App\EventSubscriber;
 
 use function sprintf;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -10,7 +11,9 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ExceptionSubscriber implements EventSubscriberInterface {
-  public static function getSubscribedEvents() {
+  public function __construct(private readonly LoggerInterface $logger) {}
+
+  public static function getSubscribedEvents(): array {
     return [
       KernelEvents::EXCEPTION => 'processException',
     ];
@@ -19,14 +22,13 @@ class ExceptionSubscriber implements EventSubscriberInterface {
   public function processException(ExceptionEvent $event) {
     $exception = $event->getThrowable();
 
-    $message = sprintf(
-        'My Error says: %s with code: %s',
-        $exception->getMessage(),
-        $exception->getCode()
-    );
+    $this->logger->error($exception);
 
     $response = new JsonResponse();
-    $response->setData(['message' => $message]);
+    $response->setData([
+      'error' => $exception->getMessage(),
+      'errorCode' => $exception->getCode(),
+    ]);
 
     if ($exception instanceof HttpExceptionInterface) {
       $response->setStatusCode($exception->getStatusCode());

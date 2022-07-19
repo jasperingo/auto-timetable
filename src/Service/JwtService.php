@@ -23,7 +23,7 @@ class JwtService {
 
     return new JwtPayload(
       $payload->sub,
-      $payload->userType,
+      $payload->subType,
       $payload->iat,
       $payload->exp,
     );
