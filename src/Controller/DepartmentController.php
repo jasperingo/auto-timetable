@@ -56,4 +56,15 @@ class DepartmentController extends AbstractController {
 
     return $this->json(['data' => $department], Response::HTTP_CREATED);
   }
+
+  #[Route('', name: 'read-many', methods: ['GET'])]
+  public function readMany(): JsonResponse {
+    $departments = $this->departmentRepository->findAll();
+
+    foreach ($departments as $department) {
+      $department->staffs = [];
+    }
+
+    return $this->json(['data' => $departments]);
+  }
 }

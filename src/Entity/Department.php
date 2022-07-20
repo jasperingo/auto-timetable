@@ -27,5 +27,5 @@ class Department {
   public string $code;
 
   #[OneToMany('department', targetEntity: Staff::class)]
-  public PersistentCollection $staffs;
+  public PersistentCollection | array $staffs;
 }
