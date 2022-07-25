@@ -15,7 +15,7 @@ class ExistingDepartmentIdValidator extends ConstraintValidator {
       throw new UnexpectedTypeException($constraint, ExistingDepartmentId::class);
     }
 
-    if (!$this->departmentRepository->existsById($value)) {
+    if (!$constraint->allowNull && !$this->departmentRepository->existsById($value)) {
       $this->context->buildViolation($constraint->message)
         ->addViolation();
     }

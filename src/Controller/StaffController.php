@@ -62,7 +62,9 @@ class StaffController extends AbstractController {
     $staff->staffNumber = $staffDto->staffNumber;
     $staff->password = $this->passwordHasher->hashPassword($staff, $staffDto->password);
 
-    $staff->department = $this->departmentRepository->find($staffDto->departmentId);
+    if ($staffDto->departmentId !== null) {
+      $staff->department = $this->departmentRepository->find($staffDto->departmentId);
+    }
 
     $this->staffRepository->save($staff);
 

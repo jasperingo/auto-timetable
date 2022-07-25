@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\DepartmentRepository;
@@ -26,6 +25,9 @@ class Department {
   #[Column(type: 'string')]
   public string $code;
 
-  #[OneToMany('department', targetEntity: Staff::class)]
+  #[OneToMany('department', Staff::class)]
   public PersistentCollection | array $staffs;
+
+  #[OneToMany('hall', Hall::class)]
+  public PersistentCollection | array $halls;
 }
