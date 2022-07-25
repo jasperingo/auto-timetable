@@ -16,7 +16,7 @@ class DepartmentVoter extends Voter {
     $user = $token->getUser();
 
     if (
-      $attribute === VoterAction::CREATE &&
+      ($attribute === VoterAction::CREATE || $attribute === VoterAction::UPDATE) &&
       $user instanceof Staff &&
       $user->role === StaffRole::Admin
     ) {

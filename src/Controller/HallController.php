@@ -1,10 +1,10 @@
 <?php
 namespace App\Controller;
 
+use Exception;
 use App\Entity\Hall;
 use App\Repository\DepartmentRepository;
 use App\Security\VoterAction;
-use Exception;
 use App\Dto\CreateHallDto;
 use App\Dto\ValidationErrorDto;
 use App\Repository\HallRepository;

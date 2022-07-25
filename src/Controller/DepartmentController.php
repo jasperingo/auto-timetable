@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Dto\UpdateDepartmentDto;
 use function strtoupper;
 use Exception;
 use App\Entity\Department;
@@ -57,11 +58,55 @@ class DepartmentController extends AbstractController {
     return $this->json(['data' => $department], Response::HTTP_CREATED);
   }
 
+  #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT'],), JwtAuth]
+  public function update(Request $request, int $id): JsonResponse {
+    $department = $this->departmentRepository->find($id);
+
+    if ($department === null) {
+      return new JsonResponse(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::UPDATE, $department);
+
+    try {
+      $departmentDto = $this->serializer->deserialize(
+        $request->getContent(),
+        UpdateDepartmentDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $departmentDto = new UpdateDepartmentDto;
+    }
+
+    $errors = $this->validator->validate($departmentDto);
+
+    if (count($errors) > 0) {
+      $errorsList = ValidationErrorDto::listOf($errors);
+      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+    }
+
+    if ($departmentDto->name !== null) {
+      $department->name = $departmentDto->name;
+    }
+
+    if ($departmentDto->code !== null) {
+      $department->code = strtoupper($departmentDto->code);
+    }
+
+    $this->departmentRepository->save($department);
+
+    $department->halls = [];
+    $department->staffs = [];
+
+    return $this->json(['data' => $department]);
+  }
+
   #[Route('', name: 'read-many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $departments = $this->departmentRepository->findAll();
 
     foreach ($departments as $department) {
+      $department->halls = [];
       $department->staffs = [];
     }
 
