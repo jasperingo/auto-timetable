@@ -58,7 +58,7 @@ class DepartmentController extends AbstractController {
     return $this->json(['data' => $department], Response::HTTP_CREATED);
   }
 
-  #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT'],), JwtAuth]
+  #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']), JwtAuth]
   public function update(Request $request, int $id): JsonResponse {
     $department = $this->departmentRepository->find($id);
 

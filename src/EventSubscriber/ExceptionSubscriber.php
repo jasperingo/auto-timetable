@@ -1,7 +1,6 @@
 <?php
 namespace App\EventSubscriber;
 
-use function sprintf;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;

@@ -3,12 +3,13 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Hall;
-use App\Repository\DepartmentRepository;
+use App\Security\JwtAuth;
 use App\Security\VoterAction;
+use App\Dto\UpdateHallDto;
 use App\Dto\CreateHallDto;
 use App\Dto\ValidationErrorDto;
 use App\Repository\HallRepository;
-use App\Security\JwtAuth;
+use App\Repository\DepartmentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,7 @@ class HallController extends AbstractController {
 
     if (count($errors) > 0) {
       $errorsList = ValidationErrorDto::listOf($errors);
-      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
     $hall->name = $hallDto->name;
@@ -62,5 +63,60 @@ class HallController extends AbstractController {
     $hall->department->halls = [];
 
     return $this->json(['data' => $hall], Response::HTTP_CREATED);
+  }
+
+  #[Route('/{id}', name: 'create', requirements: ['id' => '\d+'], methods: ['PUT']), JwtAuth]
+  public function update(Request $request, int $id): JsonResponse {
+    $hall = $this->hallRepository->find($id);
+
+    if ($hall === null) {
+      return $this->json(['error' => 'Hall not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::UPDATE, $hall);
+
+    try {
+      $hallDto = $this->serializer->deserialize(
+        $request->getContent(),
+        UpdateHallDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $hallDto = new UpdateHallDto;
+    }
+
+    $errors = $this->validator->validate($hallDto);
+
+    if (count($errors) > 0) {
+      $errorsList = ValidationErrorDto::listOf($errors);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+    }
+
+    if ($hallDto->name !== null) {
+      $hall->name = $hallDto->name;
+    }
+
+    if ($hallDto->capacity !== null) {
+      $hall->capacity = $hallDto->capacity;
+    }
+
+    $this->hallRepository->save($hall);
+
+    $hall->department->halls = [];
+    $hall->department->staffs = [];
+
+    return $this->json(['data' => $hall]);
+  }
+
+  #[Route('', name: 'read_many', methods: ['GET'])]
+  public function readMany(): JsonResponse {
+    $halls = $this->hallRepository->findAll();
+
+    foreach ($halls as $hall) {
+      $hall->department->halls = [];
+      $hall->department->staffs = [];
+    }
+
+    return $this->json(['data' => $halls]);
   }
 }
