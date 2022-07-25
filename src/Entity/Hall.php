@@ -29,5 +29,5 @@ class Hall {
     JoinColumn('departmentId'),
     ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'halls'),
   ]
-  public Department $department;
+  public ?Department $department;
 }

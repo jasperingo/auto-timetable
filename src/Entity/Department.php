@@ -28,6 +28,6 @@ class Department {
   #[OneToMany('department', Staff::class)]
   public PersistentCollection | array $staffs;
 
-  #[OneToMany('hall', Hall::class)]
+  #[OneToMany('department', Hall::class)]
   public PersistentCollection | array $halls;
 }

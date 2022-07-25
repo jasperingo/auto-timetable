@@ -47,7 +47,7 @@ class DepartmentController extends AbstractController {
 
     if (count($errors) > 0) {
       $errorsList = ValidationErrorDto::listOf($errors);
-      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
     $department->name = $departmentDto->name;
@@ -63,7 +63,7 @@ class DepartmentController extends AbstractController {
     $department = $this->departmentRepository->find($id);
 
     if ($department === null) {
-      return new JsonResponse(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+      return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
     }
 
     $this->denyAccessUnlessGranted(VoterAction::UPDATE, $department);
@@ -82,7 +82,7 @@ class DepartmentController extends AbstractController {
 
     if (count($errors) > 0) {
       $errorsList = ValidationErrorDto::listOf($errors);
-      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
     if ($departmentDto->name !== null) {
@@ -101,7 +101,7 @@ class DepartmentController extends AbstractController {
     return $this->json(['data' => $department]);
   }
 
-  #[Route('', name: 'read-many', methods: ['GET'])]
+  #[Route('', name: 'read_many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $departments = $this->departmentRepository->findAll();
 
@@ -111,5 +111,20 @@ class DepartmentController extends AbstractController {
     }
 
     return $this->json(['data' => $departments]);
+  }
+
+  #[Route('/{id}/halls', name: 'read_many_halls', requirements: ['id' => '\d+'], methods: ['GET'])]
+  public function readManyHalls(int $id): JsonResponse {
+    $department = $this->departmentRepository->find($id);
+
+    if ($department === null) {
+      return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    foreach ($department->halls as $hall) {
+      $hall->department = null;
+    }
+
+    return $this->json(['data' => $department->halls]);
   }
 }
