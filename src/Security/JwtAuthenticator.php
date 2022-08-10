@@ -26,7 +26,7 @@ class JwtAuthenticator extends AbstractAuthenticator {
     try {
       $controller = new ReflectionMethod($request->attributes->get('_controller'));
       return count($controller->getAttributes(JwtAuth::class)) > 0;
-    } catch (ReflectionException $e) {
+    } catch (ReflectionException) {
       throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }

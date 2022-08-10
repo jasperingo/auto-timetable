@@ -60,12 +60,18 @@ class HallController extends AbstractController {
 
     $this->hallRepository->save($hall);
 
-    $hall->department->halls = [];
-
-    return $this->json(['data' => $hall], Response::HTTP_CREATED);
+    return $this->json(
+      ['data' => $hall],
+      Response::HTTP_CREATED,
+      [],
+      ['groups' => ['hall', 'hall_department', 'department']]
+    );
   }
 
-  #[Route('/{id}', name: 'create', requirements: ['id' => '\d+'], methods: ['PUT']), JwtAuth]
+  #[
+    Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']),
+    JwtAuth
+  ]
   public function update(Request $request, int $id): JsonResponse {
     $hall = $this->hallRepository->find($id);
 
@@ -102,21 +108,23 @@ class HallController extends AbstractController {
 
     $this->hallRepository->save($hall);
 
-    $hall->department->halls = [];
-    $hall->department->staffs = [];
-
-    return $this->json(['data' => $hall]);
+    return $this->json(
+      ['data' => $hall],
+    Response::HTTP_OK,
+      [],
+      ['groups' => ['hall', 'hall_department', 'department']]
+    );
   }
 
   #[Route('', name: 'read_many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $halls = $this->hallRepository->findAll();
 
-    foreach ($halls as $hall) {
-      $hall->department->halls = [];
-      $hall->department->staffs = [];
-    }
-
-    return $this->json(['data' => $halls]);
+    return $this->json(
+      ['data' => $halls],
+      Response::HTTP_OK,
+      [],
+      ['groups' => ['hall', 'hall_department', 'department']]
+    );
   }
 }

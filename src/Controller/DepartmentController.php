@@ -1,12 +1,12 @@
 <?php
 namespace App\Controller;
 
-use App\Dto\UpdateDepartmentDto;
 use function strtoupper;
 use Exception;
 use App\Entity\Department;
 use App\Security\VoterAction;
 use App\Security\JwtAuth;
+use App\Dto\UpdateDepartmentDto;
 use App\Dto\ValidationErrorDto;
 use App\Dto\CreateDepartmentDto;
 use App\Repository\DepartmentRepository;
@@ -95,22 +95,24 @@ class DepartmentController extends AbstractController {
 
     $this->departmentRepository->save($department);
 
-    $department->halls = [];
-    $department->staffs = [];
-
-    return $this->json(['data' => $department]);
+    return $this->json(
+      ['data' => $department],
+      Response::HTTP_OK,
+      [],
+      ['groups' => 'department']
+    );
   }
 
   #[Route('', name: 'read_many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $departments = $this->departmentRepository->findAll();
 
-    foreach ($departments as $department) {
-      $department->halls = [];
-      $department->staffs = [];
-    }
-
-    return $this->json(['data' => $departments]);
+    return $this->json(
+      ['data' => $departments],
+      Response::HTTP_OK,
+      [],
+      ['groups' => 'department']
+    );
   }
 
   #[Route('/{id}/halls', name: 'read_many_halls', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -121,10 +123,11 @@ class DepartmentController extends AbstractController {
       return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
     }
 
-    foreach ($department->halls as $hall) {
-      $hall->department = null;
-    }
-
-    return $this->json(['data' => $department->halls]);
+    return $this->json(
+      ['data' => $department->halls],
+      Response::HTTP_OK,
+      [],
+      ['groups' => ['hall']]
+    );
   }
 }
