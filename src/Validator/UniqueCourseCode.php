@@ -5,6 +5,6 @@ use Attribute;
 use Symfony\Component\Validator\Constraint;
 
 #[Attribute]
-class CorrectPassword extends Constraint {
-  public string $message = 'This password is incorrect';
+class UniqueCourseCode extends Constraint {
+  public string $message = 'This course code already exists';
 }

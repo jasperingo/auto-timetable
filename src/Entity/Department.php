@@ -36,4 +36,8 @@ class Department {
   #[OneToMany('department', Hall::class)]
   #[Groups(['department_halls'])]
   public PersistentCollection | array $halls;
+
+  #[OneToMany('course', Course::class)]
+  #[Groups(['department_courses'])]
+  public PersistentCollection | array $courses;
 }

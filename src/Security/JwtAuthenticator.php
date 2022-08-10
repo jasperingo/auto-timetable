@@ -1,6 +1,7 @@
 <?php
 namespace App\Security;
 
+use Exception;
 use function strlen;
 use function strtr;
 use function substr;
@@ -40,7 +41,15 @@ class JwtAuthenticator extends AbstractAuthenticator {
 
     $jwtToken = substr($authHeader, strlen('Bearer '));
 
-    $payload = $this->jwtService->unSign($jwtToken);
+    if (empty($jwtToken)) {
+      throw new CustomUserMessageAuthenticationException("No JWT token provided");
+    }
+
+    try {
+      $payload = $this->jwtService->unSign($jwtToken);
+    } catch (Exception) {
+      throw new CustomUserMessageAuthenticationException("Invalid JWT token provided");
+    }
 
     return new SelfValidatingPassport(new UserBadge($payload->sub));
   }
