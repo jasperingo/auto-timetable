@@ -2,6 +2,7 @@
 namespace App\Dto;
 
 use App\Validator\ExistingDepartmentId;
+use App\Validator\StaffHasDepartmentId;
 use App\Validator\UniqueHallName;
 use Symfony\Component\Validator\Constraints;
 
@@ -23,6 +24,7 @@ class CreateHallDto {
     new Constraints\NotBlank(allowNull: true),
     new Constraints\Type('integer'),
     new ExistingDepartmentId(true),
+    new StaffHasDepartmentId,
   ])]
   public ?int $departmentId = null;
 }

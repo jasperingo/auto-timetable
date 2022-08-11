@@ -63,8 +63,7 @@ class HallController extends AbstractController {
     return $this->json(
       ['data' => $hall],
       Response::HTTP_CREATED,
-      [],
-      ['groups' => ['hall', 'hall_department', 'department']]
+      context: ['groups' => ['hall', 'hall_department', 'department']]
     );
   }
 
@@ -110,9 +109,7 @@ class HallController extends AbstractController {
 
     return $this->json(
       ['data' => $hall],
-    Response::HTTP_OK,
-      [],
-      ['groups' => ['hall', 'hall_department', 'department']]
+      context: ['groups' => ['hall', 'hall_department', 'department']]
     );
   }
 
@@ -122,9 +119,7 @@ class HallController extends AbstractController {
 
     return $this->json(
       ['data' => $halls],
-      Response::HTTP_OK,
-      [],
-      ['groups' => ['hall', 'hall_department', 'department']]
+      context: ['groups' => ['hall', 'hall_department', 'department']]
     );
   }
 }

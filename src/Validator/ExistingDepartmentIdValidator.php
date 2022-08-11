@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Validator;
 
 use App\Repository\DepartmentRepository;
@@ -15,7 +14,10 @@ class ExistingDepartmentIdValidator extends ConstraintValidator {
       throw new UnexpectedTypeException($constraint, ExistingDepartmentId::class);
     }
 
-    if (!$constraint->allowNull && !$this->departmentRepository->existsById($value)) {
+    if (
+      (!$constraint->allowNull && $value === null) ||
+      ($value !== null && !$this->departmentRepository->existsById($value))
+    ) {
       $this->context->buildViolation($constraint->message)
         ->addViolation();
     }

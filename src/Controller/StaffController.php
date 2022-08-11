@@ -51,7 +51,7 @@ class StaffController extends AbstractController {
 
     if (count($errors) > 0) {
       $errorsList = ValidationErrorDto::listOf($errors);
-      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
     $staff->role = $staffDto->role;
@@ -68,7 +68,7 @@ class StaffController extends AbstractController {
 
     $this->staffRepository->save($staff);
 
-    return new JsonResponse(['data' => $staff], Response::HTTP_CREATED);
+    return $this->json(['data' => $staff], Response::HTTP_CREATED);
   }
 
   #[
@@ -84,7 +84,7 @@ class StaffController extends AbstractController {
     $staff = $this->staffRepository->find($id);
 
     if ($staff === null) {
-      return new JsonResponse(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
+      return $this->json(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
     }
 
     $this->denyAccessUnlessGranted(VoterAction::UPDATE, $staff);
@@ -103,14 +103,14 @@ class StaffController extends AbstractController {
 
     if (count($errors) > 0) {
       $errorsList = ValidationErrorDto::listOf($errors);
-      return new JsonResponse(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
     }
 
     $staff->password = $this->passwordHasher->hashPassword($staff, $passwordDto->password);
 
     $this->staffRepository->save($staff);
 
-    return new JsonResponse(['data' => $staff]);
+    return $this->json(['data' => $staff]);
   }
 
   #[
@@ -126,12 +126,12 @@ class StaffController extends AbstractController {
     $staff = $this->staffRepository->find($id);
 
     if ($staff === null) {
-      return new JsonResponse(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
+      return $this->json(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);
     }
 
     $this->denyAccessUnlessGranted(VoterAction::READ, $staff);
 
-    return new JsonResponse(['data' => $staff]);
+    return $this->json(['data' => $staff]);
   }
 
   #[
@@ -147,6 +147,6 @@ class StaffController extends AbstractController {
 
     $staffs = $this->staffRepository->findAll();
 
-    return new JsonResponse(['data' => $staffs]);
+    return $this->json(['data' => $staffs]);
   }
 }

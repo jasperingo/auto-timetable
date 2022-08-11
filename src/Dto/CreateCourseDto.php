@@ -3,6 +3,7 @@ namespace App\Dto;
 
 use App\Entity\Semester;
 use App\Validator\ExistingDepartmentId;
+use App\Validator\StaffHasDepartmentId;
 use App\Validator\UniqueCourseCode;
 use App\Validator\UniqueCourseTitle;
 use Symfony\Component\Validator\Constraints;
@@ -35,6 +36,7 @@ class CreateCourseDto {
     new Constraints\NotBlank,
     new Constraints\Type('integer'),
     new ExistingDepartmentId,
+    new StaffHasDepartmentId,
   ])]
   public ?int $departmentId = null;
 }

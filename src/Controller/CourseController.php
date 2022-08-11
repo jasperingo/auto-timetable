@@ -5,6 +5,7 @@ use Exception;
 use App\Entity\Course;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
+use App\Dto\UpdateCourseDto;
 use App\Dto\CreateCourseDto;
 use App\Dto\ValidationErrorDto;
 use App\Repository\CourseRepository;
@@ -60,8 +61,66 @@ class CourseController extends AbstractController {
     return $this->json(
       ['data' => $course],
       Response::HTTP_CREATED,
-      [],
-      ['groups' => ['course', 'course_department', 'department']]
+      context: ['groups' => ['course', 'course_department', 'department']]
+    );
+  }
+
+  #[
+    Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']),
+    JwtAuth
+  ]
+  public function update(Request $request, int $id): JsonResponse {
+    $course = $this->courseRepository->find($id);
+
+    if ($course === null) {
+      return $this->json(['error' => 'Course not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::UPDATE, $course);
+
+    try {
+      $courseDto = $this->serializer->deserialize(
+        $request->getContent(),
+        UpdateCourseDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $courseDto = new UpdateCourseDto;
+    }
+
+    $errors = $this->validator->validate($courseDto);
+
+    if (count($errors) > 0) {
+      $errorsList = ValidationErrorDto::listOf($errors);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+    }
+
+    if ($courseDto->title !== null) {
+      $course->title = $courseDto->title;
+    }
+
+    if ($courseDto->code !== null) {
+      $course->code = $courseDto->code;
+    }
+
+    $this->courseRepository->save($course);
+
+    return $this->json(
+      ['data' => $course],
+      context:  ['groups' => ['course', 'course_department', 'department']]
+    );
+  }
+
+  #[Route('', name: 'read_many', methods: ['GET'])]
+  public function readMany(Request $request): JsonResponse {
+    $courses = $this->courseRepository->findBy([
+      'semester' => $request->query->get('semester'),
+      'department' => $request->query->get('departmentId'),
+    ]);
+
+    return $this->json(
+      ['data' => $courses],
+      context:  ['groups' => ['course', 'course_department', 'department']]
     );
   }
 }

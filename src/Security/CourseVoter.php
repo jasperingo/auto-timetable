@@ -3,6 +3,7 @@ namespace App\Security;
 
 use App\Entity\Course;
 use App\Entity\Staff;
+use App\Entity\StaffRole;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -17,6 +18,17 @@ class CourseVoter extends Voter {
     if (
       $attribute === VoterAction::CREATE &&
       $user instanceof Staff
+    ) {
+      return true;
+    }
+
+    if (
+      $attribute === VoterAction::UPDATE &&
+      $user instanceof Staff &&
+      (
+        $user->role === StaffRole::Admin ||
+        $user->department->id === $subject->department->id
+      )
     ) {
       return true;
     }
