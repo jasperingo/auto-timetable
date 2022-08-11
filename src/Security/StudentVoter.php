@@ -21,6 +21,14 @@ class StudentVoter extends Voter {
       return true;
     }
 
+    if (
+      $attribute === VoterAction::UPDATE &&
+      $user instanceof Student &&
+      $subject->id === $user->id
+    ) {
+      return true;
+    }
+
     return false;
   }
 }

@@ -8,7 +8,7 @@ use App\Security\JwtAuth;
 use App\Security\VoterAction;
 use App\Dto\CreateStaffDto;
 use App\Dto\ValidationErrorDto;
-use App\Dto\UpdateStaffPasswordDto;
+use App\Dto\UpdatePasswordDto;
 use App\Repository\StaffRepository;
 use App\Repository\DepartmentRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -96,11 +96,11 @@ class StaffController extends AbstractController {
     try {
       $passwordDto = $this->serializer->deserialize(
         $request->getContent(),
-        UpdateStaffPasswordDto::class,
+        UpdatePasswordDto::class,
         JsonEncoder::FORMAT,
       );
     } catch (Exception) {
-      $passwordDto = new UpdateStaffPasswordDto;
+      $passwordDto = new UpdatePasswordDto;
     }
 
     $errors = $this->validator->validate($passwordDto);

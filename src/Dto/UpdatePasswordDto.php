@@ -4,7 +4,7 @@ namespace App\Dto;
 use App\Validator\CorrectPassword;
 use Symfony\Component\Validator\Constraints;
 
-class UpdateStaffPasswordDto {
+class UpdatePasswordDto {
   #[Constraints\Sequentially([
     new Constraints\NotBlank,
     new Constraints\Length(min: 6),

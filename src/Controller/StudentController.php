@@ -3,13 +3,14 @@ namespace App\Controller;
 
 use DateTime;
 use Exception;
+use App\Dto\UpdatePasswordDto;
 use App\Dto\CreateStudentDto;
 use App\Dto\ValidationErrorDto;
 use App\Entity\Student;
 use App\Security\JwtAuth;
+use App\Security\VoterAction;
 use App\Repository\DepartmentRepository;
 use App\Repository\StudentRepository;
-use App\Security\VoterAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,6 +66,46 @@ class StudentController extends AbstractController {
     return $this->json(
       ['data' => $student],
       Response::HTTP_CREATED,
+      context: ['groups' => ['student', 'student_department', 'department']]
+    );
+  }
+
+  #[
+    Route('/{id}/password', name: 'update_password', requirements: ['id' => '\d+'], methods: ['PUT']),
+    JwtAuth
+  ]
+  public function updatePassword(Request $request, int $id): JsonResponse {
+    $student = $this->studentRepository->find($id);
+
+    if ($student === null) {
+      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::UPDATE, $student);
+
+    try {
+      $passwordDto = $this->serializer->deserialize(
+        $request->getContent(),
+        UpdatePasswordDto::class,
+        JsonEncoder::FORMAT,
+      );
+    } catch (Exception) {
+      $passwordDto = new UpdatePasswordDto;
+    }
+
+    $errors = $this->validator->validate($passwordDto);
+
+    if (count($errors) > 0) {
+      $errorsList = ValidationErrorDto::listOf($errors);
+      return $this->json(['errors' => $errorsList], Response::HTTP_BAD_REQUEST);
+    }
+
+    $student->password = $this->passwordHasher->hashPassword($student, $passwordDto->password);
+
+    $this->studentRepository->save($student);
+
+    return $this->json(
+      ['data' => $student],
       context: ['groups' => ['student', 'student_department', 'department']]
     );
   }
