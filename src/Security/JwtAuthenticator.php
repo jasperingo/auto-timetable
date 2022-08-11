@@ -1,10 +1,10 @@
 <?php
 namespace App\Security;
 
-use Exception;
 use function strlen;
 use function strtr;
 use function substr;
+use Exception;
 use ReflectionMethod;
 use ReflectionException;
 use App\Service\JwtService;

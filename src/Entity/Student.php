@@ -2,76 +2,64 @@
 namespace App\Entity;
 
 use DateTime;
-use App\Repository\StaffRepository;
+use App\Repository\StudentRepository;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\GeneratedValue;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\Ignore;
 
-#[Entity(StaffRepository::class), Table('staffs')]
-class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
+#[Entity(StudentRepository::class), Table('students')]
+class Student implements UserInterface, PasswordAuthenticatedUserInterface {
   #[
-		Id, 
+    Id,
 		Column('id', 'integer'),
 		GeneratedValue,
-    Groups(['staff'])
+    Groups(['student'])
 	]
 	public int $id;
 
-  #[
-    Column(type: 'string'),
-    Groups(['staff'])
-  ]
-	public ?string $title;
-
 	#[
     Column(type: 'string', nullable: false),
-    Groups(['staff'])
+    Groups(['student'])
   ]
 	public string $firstName;
 
 	#[
     Column(type: 'string', nullable: false),
-    Groups(['staff'])
+    Groups(['student'])
   ]
 	public string $lastName;
-	
+
 	#[
     Column(type: 'string', unique: true, nullable: false),
-    Groups(['staff'])
+    Groups(['student'])
   ]
-	public string $staffNumber;
-	
+	public string $matriculationNumber;
+
 	#[
     Column(type: 'string', nullable: false),
-    Groups(['staff']),
+    Groups(['student']),
     Ignore
   ]
 	public string $password;
 
-  #[
-    Column(type: 'string', enumType: StaffRole::class),
-    Groups(['staff'])
-  ]
-  public StaffRole $role;
-	
 	#[
     Column(type: 'datetime', nullable: false),
-    Groups(['staff'])
+    Groups(['student'])
   ]
 	public DateTime $createdAt;
 
   #[
     JoinColumn('departmentId'),
     ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'staffs'),
-    Groups(['staff_department'])
+    Groups(['student_department'])
   ]
   public Department $department;
 
@@ -80,7 +68,7 @@ class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
   }
 
   public function getRoles(): array {
-    return array_column(StaffRole::cases(), 'value');
+    return [];
   }
 
   public function eraseCredentials() {
@@ -88,6 +76,6 @@ class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
   }
 
   public function getUserIdentifier(): string {
-    return $this->staffNumber;
+    return $this->matriculationNumber;
   }
 }

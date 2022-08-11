@@ -16,28 +16,38 @@ class Department {
   #[
     Id,
     Column('id', 'integer'),
-    GeneratedValue
+    GeneratedValue,
+    Groups(['department'])
   ]
-  #[Groups(['department'])]
   public int $id;
 
-  #[Column(type: 'string')]
-  #[Groups(['department'])]
+  #[
+    Column(type: 'string'),
+    Groups(['department'])
+  ]
   public string $name;
 
-  #[Column(type: 'string')]
-  #[Groups(['department'])]
+  #[
+    Column(type: 'string'),
+    Groups(['department'])
+  ]
   public string $code;
 
-  #[OneToMany('department', Staff::class)]
-  #[Groups(['department_staffs'])]
+  #[
+    OneToMany('department', Staff::class),
+    Groups(['department_staffs'])
+  ]
   public PersistentCollection | array $staffs;
 
-  #[OneToMany('department', Hall::class)]
-  #[Groups(['department_halls'])]
+  #[
+    OneToMany('department', Hall::class),
+    Groups(['department_halls'])
+  ]
   public PersistentCollection | array $halls;
 
-  #[OneToMany('course', Course::class)]
-  #[Groups(['department_courses'])]
+  #[
+    OneToMany('course', Course::class),
+    Groups(['department_courses'])
+  ]
   public PersistentCollection | array $courses;
 }

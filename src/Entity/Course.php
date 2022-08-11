@@ -16,27 +16,33 @@ class Course {
   #[
     Id,
     Column('id', 'integer'),
-    GeneratedValue
+    GeneratedValue,
+    Groups(['course'])
   ]
-  #[Groups(['course'])]
   public int $id;
 
-  #[Column(type: 'string')]
-  #[Groups(['course'])]
+  #[
+    Column(type: 'string'),
+    Groups(['course'])
+  ]
   public string $title;
 
-  #[Column(type: 'string')]
-  #[Groups(['course'])]
+  #[
+    Column(type: 'string'),
+    Groups(['course'])
+  ]
   public string $code;
 
-  #[Column(type: 'string', enumType: Semester::class)]
-  #[Groups(['course'])]
+  #[
+    Column(type: 'string', enumType: Semester::class),
+    Groups(['course'])
+  ]
   public Semester $semester;
 
   #[
     JoinColumn('departmentId'),
     ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'courses'),
+    Groups(['course_department'])
   ]
-  #[Groups(['course_department'])]
   public Department $department;
 }

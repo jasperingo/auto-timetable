@@ -16,23 +16,27 @@ class Hall {
   #[
     Id,
     Column('id', 'integer'),
-    GeneratedValue
+    GeneratedValue,
+    Groups(['hall'])
   ]
-  #[Groups(['hall'])]
   public int $id;
 
-  #[Column(type: 'string')]
-  #[Groups(['hall'])]
+  #[
+    Column(type: 'string'),
+    Groups(['hall'])
+  ]
   public string $name;
 
-  #[Column(type: 'integer')]
-  #[Groups(['hall'])]
+  #[
+    Column(type: 'integer'),
+    Groups(['hall'])
+  ]
   public int $capacity;
 
   #[
     JoinColumn('departmentId'),
     ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'halls'),
+    Groups(['hall_department'])
   ]
-  #[Groups(['hall_department'])]
   public ?Department $department;
 }

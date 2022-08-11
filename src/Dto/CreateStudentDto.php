@@ -1,17 +1,12 @@
 <?php
 namespace App\Dto;
 
-use App\Entity\StaffRole;
 use App\Validator\ExistingDepartmentId;
-use App\Validator\PermittedRole;
 use App\Validator\StaffHasDepartmentId;
-use App\Validator\UniqueStaffNumber;
+use App\Validator\UniqueMatriculationNumber;
 use Symfony\Component\Validator\Constraints;
 
-class CreateStaffDto {
-  #[Constraints\NotBlank(allowNull: true)]
-  public ?string $title = null;
-
+class CreateStudentDto {
   #[Constraints\NotBlank]
   public ?string $firstName = null;
 
@@ -20,25 +15,16 @@ class CreateStaffDto {
 
   #[Constraints\Sequentially([
     new Constraints\NotBlank,
-    new UniqueStaffNumber
+    new UniqueMatriculationNumber,
+    new Constraints\Length(min: 11),
   ])]
-  public ?string $staffNumber = null;
+  public ?string $matriculationNumber = null;
 
   #[Constraints\Sequentially([
     new Constraints\NotBlank,
     new Constraints\Length(min: 6),
   ])]
   public ?string $password = null;
-
-  #[Constraints\Sequentially([
-    new Constraints\NotBlank,
-    new Constraints\Choice(choices: [
-      StaffRole::ExamOfficer,
-      StaffRole::Invigilator
-    ]),
-    new PermittedRole,
-  ])]
-  public ?StaffRole $role = null;
 
   #[Constraints\Sequentially([
     new Constraints\NotBlank,

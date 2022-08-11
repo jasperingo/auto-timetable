@@ -68,7 +68,11 @@ class StaffController extends AbstractController {
 
     $this->staffRepository->save($staff);
 
-    return $this->json(['data' => $staff], Response::HTTP_CREATED);
+    return $this->json(
+      ['data' => $staff],
+      Response::HTTP_CREATED,
+      context: ['groups' => ['staff', 'staff_department', 'department']]
+    );
   }
 
   #[
@@ -110,7 +114,10 @@ class StaffController extends AbstractController {
 
     $this->staffRepository->save($staff);
 
-    return $this->json(['data' => $staff]);
+    return $this->json(
+      ['data' => $staff],
+      context: ['groups' => ['staff', 'staff_department', 'department']]
+    );
   }
 
   #[
@@ -131,7 +138,10 @@ class StaffController extends AbstractController {
 
     $this->denyAccessUnlessGranted(VoterAction::READ, $staff);
 
-    return $this->json(['data' => $staff]);
+    return $this->json(
+      ['data' => $staff],
+      context: ['groups' => ['staff', 'staff_department', 'department']]
+    );
   }
 
   #[
@@ -147,6 +157,9 @@ class StaffController extends AbstractController {
 
     $staffs = $this->staffRepository->findAll();
 
-    return $this->json(['data' => $staffs]);
+    return $this->json(
+      ['data' => $staffs],
+      context: ['groups' => ['staff', 'staff_department', 'department']]
+    );
   }
 }
