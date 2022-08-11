@@ -4,7 +4,7 @@ namespace App\Security;
 use function count;
 use function strtr;
 use Exception;
-use App\Dto\StaffLoginDto;
+use App\Dto\StudentLoginDto;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class StaffPasswordAuthenticator extends AbstractAuthenticator {
+class StudentPasswordAuthenticator extends AbstractAuthenticator {
   public function __construct(
     private readonly ValidatorInterface $validator,
     private readonly SerializerInterface $serializer,
@@ -30,15 +30,15 @@ class StaffPasswordAuthenticator extends AbstractAuthenticator {
   }
 
   public function authenticate(Request $request): Passport {
-    try {
-      $loginDto = $this->serializer->deserialize(
-        $request->getContent(),
-        StaffLoginDto::class,
-        JsonEncoder::FORMAT,
-      );
-    } catch (Exception) {
-      $loginDto = new StaffLoginDto;
-    }
+   try {
+     $loginDto = $this->serializer->deserialize(
+       $request->getContent(),
+       StudentLoginDto::class,
+       JsonEncoder::FORMAT,
+     );
+   } catch (Exception) {
+     $loginDto = new StudentLoginDto;
+   }
 
     $errors = $this->validator->validate($loginDto);
 
@@ -46,7 +46,10 @@ class StaffPasswordAuthenticator extends AbstractAuthenticator {
       throw new CustomUserMessageAuthenticationException('Invalid credentials.');
     }
 
-    return new Passport(new UserBadge($loginDto->staffNumber), new PasswordCredentials($loginDto->password));
+    return new Passport(
+      new UserBadge($loginDto->matriculationNumber),
+      new PasswordCredentials($loginDto->password)
+    );
   }
 
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {

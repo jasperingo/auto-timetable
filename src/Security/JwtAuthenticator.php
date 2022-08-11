@@ -7,6 +7,10 @@ use function substr;
 use Exception;
 use ReflectionMethod;
 use ReflectionException;
+use App\Entity\Staff;
+use App\Entity\Student;
+use App\Repository\StaffRepository;
+use App\Repository\StudentRepository;
 use App\Service\JwtService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +25,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
 class JwtAuthenticator extends AbstractAuthenticator {
-  public function __construct(private readonly JwtService $jwtService) {}
+  public function __construct(
+    private readonly JwtService $jwtService,
+    private readonly StaffRepository $staffRepository,
+    private readonly StudentRepository $studentRepository,
+  ) {}
 
   public function supports(Request $request): ?bool {
     try {
@@ -51,7 +59,17 @@ class JwtAuthenticator extends AbstractAuthenticator {
       throw new CustomUserMessageAuthenticationException("Invalid JWT token provided");
     }
 
-    return new SelfValidatingPassport(new UserBadge($payload->sub));
+    return new SelfValidatingPassport(new UserBadge($payload->sub, function ($identifier) use ($payload) {
+      if ($payload->subType === Staff::class) {
+        return $this->staffRepository->find($identifier);
+      }
+
+      if ($payload->subType === Student::class) {
+        return $this->studentRepository->find($identifier);
+      }
+
+      return null;
+    }));
   }
 
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {

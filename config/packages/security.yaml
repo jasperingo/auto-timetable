@@ -5,14 +5,21 @@ security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         users_in_memory: { memory: null }
-        app_staff_by_staff_number_provider:
-            entity:
-                class: App\Entity\Staff
-                property: staffNumber
+
         app_staff_provider:
             entity:
                 class: App\Entity\Staff
-                property: id
+                property: staffNumber
+
+        app_student_provider:
+            entity:
+                class: App\Entity\Student
+                property: matriculationNumber
+
+        app_users_provider:
+            chain:
+                providers: ['app_staff_provider', 'app_student_provider']
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -20,14 +27,21 @@ security:
 
         staff_login:
             pattern: ^/v1/auth/staff
-            provider: app_staff_by_staff_number_provider
+            provider: app_staff_provider
             stateless: true
             custom_authenticators:
                 - App\Security\StaffPasswordAuthenticator
 
+        student_login:
+            pattern: ^/v1/auth/student
+            provider: app_student_provider
+            stateless: true
+            custom_authenticators:
+                - App\Security\StudentPasswordAuthenticator
+
         main:
             lazy: true
-            provider: app_staff_provider
+            provider: app_users_provider
             stateless: true
             custom_authenticators:
                 - App\Security\JwtAuthenticator
