@@ -29,6 +29,19 @@ class StudentVoter extends Voter {
       return true;
     }
 
+    if (
+      $attribute === VoterAction::READ &&
+      (
+        $user instanceof Staff ||
+        (
+          $user instanceof Student &&
+          $user->id === $subject->id
+        )
+      )
+    ) {
+      return true;
+    }
+
     return false;
   }
 }

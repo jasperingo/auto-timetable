@@ -109,4 +109,23 @@ class StudentController extends AbstractController {
       context: ['groups' => ['student', 'student_department', 'department']]
     );
   }
+
+  #[
+    Route('/{id}', name: 'read', requirements: ['id' => '\d+'], methods: ['GET']),
+    JwtAuth
+  ]
+  public function read(int $id): JsonResponse {
+    $student = $this->studentRepository->find($id);
+
+    if ($student === null) {
+      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::READ, $student);
+
+    return $this->json(
+      ['data' => $student],
+      context: ['groups' => ['student', 'student_department', 'department']]
+    );
+  }
 }
