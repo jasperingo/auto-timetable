@@ -22,6 +22,14 @@ class CourseRegistrationVoter extends Voter {
       return true;
     }
 
+    if (
+      $attribute === VoterAction::DELETE &&
+      $user instanceof Student &&
+      $user->id === $subject->student->id
+    ) {
+      return true;
+    }
+
     return false;
   }
 }

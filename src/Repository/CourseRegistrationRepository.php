@@ -15,6 +15,11 @@ class CourseRegistrationRepository extends ServiceEntityRepository {
     $this->getEntityManager()->flush();
   }
 
+  public function delete(CourseRegistration $courseRegistration) {
+    $this->getEntityManager()->remove($courseRegistration);
+    $this->getEntityManager()->flush();
+  }
+
   public function existsByCourseIdAndStudentIdAndSession(
     int $courseId,
     int $studentId,
