@@ -29,4 +29,35 @@ class CourseRepository extends ServiceEntityRepository {
     $course = $this->findOneBy(['code' => $code]);
     return $course !== null;
   }
+
+  public function findAllByStudentLevelAndDepartmentIdAndLevelAndSemester(
+    $studentLevel,
+    $level,
+    $semester,
+    $departmentId
+  ) {
+
+    $qb = $this->getEntityManager()->createQueryBuilder()
+      ->select('c')
+      ->from(Course::class, 'c')
+      ->where('c.level <= ?1')
+      ->setParameter(1, $studentLevel);
+
+    if (!empty($level)) {
+      $qb->andWhere('c.level = ?2')
+        ->setParameter(2, $level);
+    }
+
+    if (!empty($semester)) {
+      $qb->andWhere('c.semester = ?3')
+        ->setParameter(3, $semester);
+    }
+
+    if (!empty($departmentId)) {
+      $qb->andWhere('c.department = ?4')
+        ->setParameter(4, $departmentId);
+    }
+
+    return $qb->getQuery()->getResult();
+  }
 }

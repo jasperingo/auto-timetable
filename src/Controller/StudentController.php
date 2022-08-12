@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Course;
+use App\Repository\CourseRepository;
 use DateTime;
 use Exception;
 use App\Dto\UpdatePasswordDto;
@@ -27,6 +29,7 @@ class StudentController extends AbstractController {
     private readonly StudentRepository $studentRepository,
     private readonly ValidatorInterface $validator,
     private readonly SerializerInterface $serializer,
+    private readonly CourseRepository $courseRepository,
     private readonly DepartmentRepository $departmentRepository,
     private readonly UserPasswordHasherInterface $passwordHasher,
   ) {}
@@ -127,6 +130,40 @@ class StudentController extends AbstractController {
     return $this->json(
       ['data' => $student],
       context: ['groups' => ['student', 'student_department', 'department']]
+    );
+  }
+
+  #[
+    Route('/{id}/courses', name: 'read_many_courses', requirements: ['id' => '\d+'], methods: ['GET']),
+    JwtAuth
+  ]
+  public function readManyCourses(Request $request, int $id): JsonResponse {
+    $student = $this->studentRepository->find($id);
+
+    if ($student === null) {
+      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY_COURSES, $student);
+
+    $year = (int) date('Y');
+
+    $studentLevel = ($year - $student->joinedAt) + 1;
+
+    $level = $request->query->get('level');
+    $semester = $request->query->get('semester');
+    $departmentId = $request->query->get('departmentId');
+
+    $courses = $this->courseRepository->findAllByStudentLevelAndDepartmentIdAndLevelAndSemester(
+      $studentLevel,
+      $level,
+      $semester,
+      $departmentId,
+    );
+
+    return $this->json(
+      ['data' => $courses],
+      context: ['groups' => ['course', 'course_department', 'department']]
     );
   }
 }
