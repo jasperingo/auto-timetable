@@ -113,6 +113,20 @@ class HallController extends AbstractController {
     );
   }
 
+  #[Route('/{id}', name: 'read', methods: ['GET'])]
+  public function read(int $id): JsonResponse {
+    $hall = $this->hallRepository->find($id);
+
+    if ($hall === null) {
+      return $this->json(['error' => 'Hall not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    return $this->json(
+      ['data' => $hall],
+      context:  ['groups' => ['hall', 'hall_department', 'department']]
+    );
+  }
+
   #[Route('', name: 'read_many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $halls = $this->hallRepository->findAll();
