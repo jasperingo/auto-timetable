@@ -111,15 +111,16 @@ class CourseController extends AbstractController {
     );
   }
 
-  #[Route('', name: 'read_many', methods: ['GET'])]
-  public function readMany(Request $request): JsonResponse {
-    $courses = $this->courseRepository->findBy([
-      'semester' => $request->query->get('semester'),
-      'department' => $request->query->get('departmentId'),
-    ]);
+  #[Route('/{id}', name: 'read', methods: ['GET'])]
+  public function read(int $id): JsonResponse {
+    $course = $this->courseRepository->find($id);
+
+    if ($course === null) {
+      return $this->json(['error' => 'Course not found'], Response::HTTP_NOT_FOUND);
+    }
 
     return $this->json(
-      ['data' => $courses],
+      ['data' => $course],
       context:  ['groups' => ['course', 'course_department', 'department']]
     );
   }
