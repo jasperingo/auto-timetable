@@ -53,6 +53,7 @@ class CourseController extends AbstractController {
 
     $course->title = $courseDto->title;
     $course->code = $courseDto->code;
+    $course->level = $courseDto->level;
     $course->semester = $courseDto->semester;
     $course->department = $this->departmentRepository->find($courseDto->departmentId);
 

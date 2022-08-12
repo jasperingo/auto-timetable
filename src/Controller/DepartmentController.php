@@ -1,10 +1,9 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Student;
-use Doctrine\Common\Collections\Criteria;
 use function strtoupper;
 use Exception;
+use App\Entity\Student;
 use App\Entity\Department;
 use App\Security\VoterAction;
 use App\Security\JwtAuth;
@@ -12,6 +11,7 @@ use App\Dto\UpdateDepartmentDto;
 use App\Dto\ValidationErrorDto;
 use App\Dto\CreateDepartmentDto;
 use App\Repository\DepartmentRepository;
+use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

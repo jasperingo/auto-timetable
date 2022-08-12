@@ -25,6 +25,13 @@ class CreateCourseDto {
 
   #[Constraints\Sequentially([
     new Constraints\NotBlank,
+    new Constraints\Type('integer'),
+    new Constraints\GreaterThanOrEqual(1),
+  ])]
+  public ?int $level = null;
+
+  #[Constraints\Sequentially([
+    new Constraints\NotBlank,
     new Constraints\Choice(choices: [
       Semester::First,
       Semester::Second,
