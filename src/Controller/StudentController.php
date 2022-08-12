@@ -129,4 +129,19 @@ class StudentController extends AbstractController {
       context: ['groups' => ['student', 'student_department', 'department']]
     );
   }
+
+  #[Route('', name: 'read_many', methods: ['GET']), JwtAuth]
+  public function readMany(Request $request): JsonResponse {
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, new Student);
+
+    $students = $this->studentRepository->findBy([
+      'joinedAt' => $request->query->get('session'),
+      'department' => $request->query->get('departmentId'),
+    ]);
+
+    return $this->json(
+      ['data' => $students],
+      context: ['groups' => ['student', 'student_department', 'department']]
+    );
+  }
 }
