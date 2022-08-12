@@ -106,6 +106,20 @@ class DepartmentController extends AbstractController {
     );
   }
 
+  #[Route('/{id}', name: 'read', requirements: ['id' => '\d+'], methods: ['GET'])]
+  public function read(int $id): JsonResponse {
+    $department = $this->departmentRepository->find($id);
+
+    if ($department === null) {
+      return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    return $this->json(
+      ['data' => $department],
+      context: ['groups' => ['department']]
+    );
+  }
+
   #[Route('', name: 'read_many', methods: ['GET'])]
   public function readMany(): JsonResponse {
     $departments = $this->departmentRepository->findAll();
