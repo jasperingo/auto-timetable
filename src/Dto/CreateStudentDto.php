@@ -6,7 +6,10 @@ use App\Validator\StaffHasDepartmentId;
 use App\Validator\UniqueMatriculationNumber;
 use Symfony\Component\Validator\Constraints;
 
+define("YEAR", date('Y'));
+
 class CreateStudentDto {
+
   #[Constraints\NotBlank]
   public ?string $firstName = null;
 
@@ -33,4 +36,11 @@ class CreateStudentDto {
     new StaffHasDepartmentId,
   ])]
   public ?int $departmentId = null;
+
+  #[Constraints\Sequentially([
+    new Constraints\NotBlank,
+    new Constraints\Type('integer'),
+    new Constraints\LessThanOrEqual(YEAR),
+  ])]
+  public ?int $joinedAt = null;
 }

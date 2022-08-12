@@ -55,6 +55,7 @@ class StudentController extends AbstractController {
     }
 
     $student->createdAt = new DateTime;
+    $student->joinedAt = $studentDto->joinedAt;
     $student->lastName = $studentDto->lastName;
     $student->firstName = $studentDto->firstName;
     $student->matriculationNumber = $studentDto->matriculationNumber;

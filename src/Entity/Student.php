@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use DateTime;
 use App\Repository\StudentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -49,6 +50,12 @@ class Student implements UserInterface, PasswordAuthenticatedUserInterface {
     Ignore
   ]
 	public string $password;
+
+  #[
+    Column(type: Types::INTEGER, nullable: false),
+    Groups(['student'])
+  ]
+  public int $joinedAt;
 
 	#[
     Column(type: 'datetime', nullable: false),
