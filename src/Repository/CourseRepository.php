@@ -36,7 +36,6 @@ class CourseRepository extends ServiceEntityRepository {
     $semester,
     $departmentId
   ) {
-
     $qb = $this->getEntityManager()->createQueryBuilder()
       ->select('c')
       ->from(Course::class, 'c')

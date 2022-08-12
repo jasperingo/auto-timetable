@@ -1,7 +1,9 @@
 <?php
 namespace App\Repository;
 
+use App\Entity\Course;
 use App\Entity\CourseRegistration;
+use App\Entity\Student;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
@@ -31,5 +33,25 @@ class CourseRegistrationRepository extends ServiceEntityRepository {
       'session' => $session
     ]);
     return $courseRegistration !== null;
+  }
+
+  public function findAllByStudentIdAndSessionAndSemester(
+    $studentId,
+    $session,
+    $semester
+  ) {
+    return $this->getEntityManager()->createQueryBuilder()
+      ->select('cr')
+      ->from(CourseRegistration::class, 'cr')
+      ->join(Course::class, 'c')
+      ->join(Student::class, 's')
+      ->where('s.id = ?1')
+      ->andWhere('cr.session = ?2')
+      ->andWhere('c.semester = ?3')
+      ->setParameter(1, $studentId)
+      ->setParameter(2, $session)
+      ->setParameter(3, $semester)
+      ->getQuery()
+      ->getResult();
   }
 }

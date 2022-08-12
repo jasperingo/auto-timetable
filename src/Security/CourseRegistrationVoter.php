@@ -1,6 +1,7 @@
 <?php
 namespace App\Security;
 
+use App\Entity\Staff;
 use App\Entity\Student;
 use App\Entity\CourseRegistration;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -26,6 +27,19 @@ class CourseRegistrationVoter extends Voter {
       $attribute === VoterAction::DELETE &&
       $user instanceof Student &&
       $user->id === $subject->student->id
+    ) {
+      return true;
+    }
+
+    if (
+      $attribute === VoterAction::READ_MANY &&
+      (
+        $user instanceof Staff ||
+        (
+          $user instanceof Student &&
+          $user->id === $subject->student->id
+        )
+      )
     ) {
       return true;
     }

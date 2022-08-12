@@ -1,18 +1,19 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Course;
-use App\Repository\CourseRepository;
 use DateTime;
 use Exception;
 use App\Dto\UpdatePasswordDto;
 use App\Dto\CreateStudentDto;
 use App\Dto\ValidationErrorDto;
 use App\Entity\Student;
+use App\Entity\CourseRegistration;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
+use App\Repository\CourseRepository;
 use App\Repository\DepartmentRepository;
 use App\Repository\StudentRepository;
+use App\Repository\CourseRegistrationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,6 +33,7 @@ class StudentController extends AbstractController {
     private readonly CourseRepository $courseRepository,
     private readonly DepartmentRepository $departmentRepository,
     private readonly UserPasswordHasherInterface $passwordHasher,
+    private readonly CourseRegistrationRepository $courseRegistrationRepository,
   ) {}
 
   #[Route('', name: 'create', methods: ['POST']), JwtAuth]
@@ -164,6 +166,39 @@ class StudentController extends AbstractController {
     return $this->json(
       ['data' => $courses],
       context: ['groups' => ['course', 'course_department', 'department']]
+    );
+  }
+
+  #[
+    Route(
+      '/{id}/course-registrations',
+      name: 'read_many_course_registrations',
+      requirements: ['id' => '\d+'],
+      methods: ['GET'],
+    ),
+    JwtAuth
+  ]
+  public function readManyCourseRegistrations(Request $request, int $id): JsonResponse {
+    $student = $this->studentRepository->find($id);
+
+    if ($student === null) {
+      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $courseRegistration = new CourseRegistration;
+    $courseRegistration->student = $student;
+
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, $courseRegistration);
+
+    $courseRegistrations = $this->courseRegistrationRepository->findAllByStudentIdAndSessionAndSemester(
+      $student->id,
+      $request->query->get('session'),
+      $request->query->get('semester'),
+    );
+
+    return $this->json(
+      ['data' => $courseRegistrations],
+      context: ['groups' => ['course_registration', 'course_registration_course', 'course']]
     );
   }
 }
