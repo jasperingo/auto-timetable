@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use Doctrine\Common\Collections\Criteria;
 use function strtoupper;
 use Exception;
 use App\Entity\Department;
@@ -55,7 +56,11 @@ class DepartmentController extends AbstractController {
 
     $this->departmentRepository->save($department);
 
-    return $this->json(['data' => $department], Response::HTTP_CREATED);
+    return $this->json(
+      ['data' => $department],
+      Response::HTTP_CREATED,
+      context: ['groups' => 'department'],
+    );
   }
 
   #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']), JwtAuth]
@@ -97,9 +102,7 @@ class DepartmentController extends AbstractController {
 
     return $this->json(
       ['data' => $department],
-      Response::HTTP_OK,
-      [],
-      ['groups' => 'department']
+      context: ['groups' => 'department']
     );
   }
 
@@ -109,9 +112,7 @@ class DepartmentController extends AbstractController {
 
     return $this->json(
       ['data' => $departments],
-      Response::HTTP_OK,
-      [],
-      ['groups' => 'department']
+      context: ['groups' => 'department']
     );
   }
 
@@ -125,9 +126,27 @@ class DepartmentController extends AbstractController {
 
     return $this->json(
       ['data' => $department->halls],
-      Response::HTTP_OK,
-      [],
-      ['groups' => ['hall']]
+      context: ['groups' => ['hall']]
+    );
+  }
+
+  #[Route('/{id}/courses', name: 'read_many_courses', requirements: ['id' => '\d+'], methods: ['GET'])]
+  public function readManyCourses(Request $request, int $id): JsonResponse {
+    $department = $this->departmentRepository->find($id);
+
+    if ($department === null) {
+      return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $criteria = Criteria::create()->where(
+      Criteria::expr()->eq("semester", $request->query->get('semester'))
+    );
+
+    $courses = $department->courses->matching($criteria);
+
+    return $this->json(
+      ['data' => $courses],
+      context: ['groups' => ['course']]
     );
   }
 }

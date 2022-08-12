@@ -65,7 +65,7 @@ class Student implements UserInterface, PasswordAuthenticatedUserInterface {
 
   #[
     JoinColumn('departmentId'),
-    ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'staffs'),
+    ManyToOne(Department::class, fetch: 'EAGER', inversedBy: 'students'),
     Groups(['student_department'])
   ]
   public Department $department;
