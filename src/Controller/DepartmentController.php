@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Student;
 use Doctrine\Common\Collections\Criteria;
 use function strtoupper;
 use Exception;
@@ -63,7 +64,10 @@ class DepartmentController extends AbstractController {
     );
   }
 
-  #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']), JwtAuth]
+  #[
+    Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PUT']),
+    JwtAuth
+  ]
   public function update(Request $request, int $id): JsonResponse {
     $department = $this->departmentRepository->find($id);
 
@@ -161,6 +165,31 @@ class DepartmentController extends AbstractController {
     return $this->json(
       ['data' => $courses],
       context: ['groups' => ['course']]
+    );
+  }
+
+  #[
+    Route('/{id}/students', name: 'read_many_students', requirements: ['id' => '\d+'], methods: ['GET']),
+    JwtAuth
+  ]
+  public function readManyStudents(Request $request, int $id): JsonResponse {
+    $department = $this->departmentRepository->find($id);
+
+    if ($department === null) {
+      return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, new Student);
+
+    $criteria = Criteria::create()->where(
+      Criteria::expr()->eq("joinedAt", $request->query->get('session'))
+    );
+
+    $students = $department->students->matching($criteria);
+
+    return $this->json(
+      ['data' => $students],
+      context: ['groups' => ['student']]
     );
   }
 }
