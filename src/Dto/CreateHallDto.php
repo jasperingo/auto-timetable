@@ -24,7 +24,7 @@ class CreateHallDto {
     new Constraints\NotBlank(allowNull: true),
     new Constraints\Type('integer'),
     new ExistingDepartmentId(true),
-    new StaffHasDepartmentId,
+    new StaffHasDepartmentId(true),
   ])]
   public ?int $departmentId = null;
 }
