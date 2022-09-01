@@ -128,8 +128,12 @@ class HallController extends AbstractController {
   }
 
   #[Route('', name: 'read_many', methods: ['GET'])]
-  public function readMany(): JsonResponse {
-    $halls = $this->hallRepository->findAll();
+  public function readMany(Request $request): JsonResponse {
+    $departmentId = $request->query->get('departmentId');
+
+    $criteria = !empty($departmentId) ? ['department' => $departmentId] : [];
+
+    $halls = $this->hallRepository->findBy($criteria);
 
     return $this->json(
       ['data' => $halls],

@@ -125,4 +125,24 @@ class CourseController extends AbstractController {
       context:  ['groups' => ['course', 'course_department', 'department']]
     );
   }
+
+  #[Route('', name: 'read_many', methods: ['GET'])]
+  public function readMany(Request $request): JsonResponse {
+    $semester = $request->query->get('semester');
+
+    $departmentId = $request->query->get('departmentId');
+
+    $criteria = [];
+    
+    if (!empty($semester)) $criteria['semester'] = $semester;
+
+    if (!empty($departmentId)) $criteria['department'] = $departmentId;
+
+    $courses = $this->courseRepository->findBy($criteria);
+
+    return $this->json(
+      ['data' => $courses],
+      context: ['groups' => ['course', 'course_department', 'department']]
+    );
+  }
 }

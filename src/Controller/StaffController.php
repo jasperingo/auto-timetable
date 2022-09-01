@@ -152,10 +152,14 @@ class StaffController extends AbstractController {
     ),
     JwtAuth
   ]
-  public function readMany(): JsonResponse {
+  public function readMany(Request $request): JsonResponse {
     $this->denyAccessUnlessGranted(VoterAction::READ_MANY, new Staff);
 
-    $staffs = $this->staffRepository->findAll();
+    $departmentId = $request->query->get('departmentId');
+
+    $criteria = !empty($departmentId) ? ['department' => $departmentId] : [];
+    
+    $staffs = $this->staffRepository->findBy($criteria);
 
     return $this->json(
       ['data' => $staffs],
