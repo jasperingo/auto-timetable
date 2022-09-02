@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(HallRepository::class), Table('halls')]
@@ -39,4 +40,10 @@ class Hall {
     Groups(['hall_department'])
   ]
   public ?Department $department;
+
+  #[
+    OneToMany('hall', Examination::class),
+    Groups(['hall_examinations'])
+  ]
+  public PersistentCollection $examinations;
 }

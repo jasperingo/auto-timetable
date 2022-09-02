@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -74,6 +75,12 @@ class Staff implements UserInterface, PasswordAuthenticatedUserInterface {
     Groups(['staff_department'])
   ]
   public Department $department;
+
+  #[
+    OneToMany('staff', ExaminationInvigilator::class),
+    Groups(['staff_examination_invigilators'])
+  ]
+  public PersistentCollection $examinationInvigilators;
 
   public function getPassword(): ?string {
     return $this->password;

@@ -60,4 +60,10 @@ class Course {
     Groups(['course_registrations'])
   ]
   public PersistentCollection | array $courseRegistrations;
+
+  #[
+    OneToMany('course', Examination::class),
+    Groups(['course_examinations'])
+  ]
+  public PersistentCollection $examinations;
 }
