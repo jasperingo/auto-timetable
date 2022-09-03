@@ -8,6 +8,7 @@ use App\Dto\CreateCourseRegistrationDto;
 use App\Entity\CourseRegistration;
 use App\Repository\CourseRepository;
 use App\Repository\StudentRepository;
+use App\Repository\TimetableRepository;
 use App\Repository\CourseRegistrationRepository;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
@@ -27,6 +28,7 @@ class CourseRegistrationController extends AbstractController {
     private readonly SerializerInterface $serializer,
     private readonly CourseRepository $courseRepository,
     private readonly StudentRepository $studentRepository,
+    private readonly TimetableRepository $timetableRepository,
     private readonly CourseRegistrationRepository $courseRegistrationRepository,
   ) {}
 
@@ -84,7 +86,16 @@ class CourseRegistrationController extends AbstractController {
 
     $this->denyAccessUnlessGranted(VoterAction::DELETE, $courseRegistration);
 
-    // TODO: VALIDATE IF TIMETABLE HAS BEEN CREATED FOR COURSE.
+    $timetable = $this->timetableRepository->findOneBy([
+      'session' => $courseRegistration->session,
+      'semester' => $courseRegistration->course->semester
+    ]);
+
+    if (!empty($timetable)) {
+      return $this->json(['error' => 'A timetable has already been created'], Response::HTTP_FORBIDDEN);
+    }
+    
+    $this->courseRegistrationRepository->delete($courseRegistration);
 
     return $this->json(null, Response::HTTP_NO_CONTENT);
   }

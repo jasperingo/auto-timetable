@@ -2,7 +2,7 @@
 namespace App\Repository;
 
 use App\Entity\ExaminationInvigilator;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class ExaminationInvigilatorRepository extends ServiceEntityRepository {

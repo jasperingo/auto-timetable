@@ -184,10 +184,26 @@ class StudentController extends AbstractController {
       $semester,
       $departmentId,
     );
+    
+    foreach ($courses as $course) {
+      $courseRegistration = $this->courseRegistrationRepository->findOneBy([
+        'student' => $student->id, 
+        'course' => $course->id, 
+        'session' => $year
+      ]);
+
+      $course->courseRegistrations = empty($courseRegistration) ? [] : [$courseRegistration];
+    }
 
     return $this->json(
       ['data' => $courses],
-      context: ['groups' => ['course', 'course_department', 'department']]
+      context: ['groups' => [
+        'course', 
+        'course_department', 
+        'department', 
+        'course_registrations', 
+        'course_registration'
+      ]]
     );
   }
 

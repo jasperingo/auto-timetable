@@ -69,7 +69,7 @@ class DepartmentController extends AbstractController {
     JwtAuth
   ]
   public function update(Request $request, int $id): JsonResponse {
-    $department = $this->departmentRepository->find($id);
+    $department = (object) $this->departmentRepository->find($id);
 
     if ($department === null) {
       return $this->json(['error' => 'Department not found'], Response::HTTP_NOT_FOUND);

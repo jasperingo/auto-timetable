@@ -72,7 +72,7 @@ class HallController extends AbstractController {
     JwtAuth
   ]
   public function update(Request $request, int $id): JsonResponse {
-    $hall = $this->hallRepository->find($id);
+    $hall = (object) $this->hallRepository->find($id);
 
     if ($hall === null) {
       return $this->json(['error' => 'Hall not found'], Response::HTTP_NOT_FOUND);

@@ -71,7 +71,7 @@ class CourseController extends AbstractController {
     JwtAuth
   ]
   public function update(Request $request, int $id): JsonResponse {
-    $course = $this->courseRepository->find($id);
+    $course = (object) $this->courseRepository->find($id);
 
     if ($course === null) {
       return $this->json(['error' => 'Course not found'], Response::HTTP_NOT_FOUND);

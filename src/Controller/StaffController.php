@@ -85,7 +85,7 @@ class StaffController extends AbstractController {
     JwtAuth
   ]
   public function updatePassword(Request $request, int $id): JsonResponse {
-    $staff = $this->staffRepository->find($id);
+    $staff = (object) $this->staffRepository->find($id);
 
     if ($staff === null) {
       return $this->json(['error' => 'Staff not found'], Response::HTTP_NOT_FOUND);

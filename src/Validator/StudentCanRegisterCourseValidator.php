@@ -27,7 +27,7 @@ class StudentCanRegisterCourseValidator extends ConstraintValidator {
 
     $userLevel = ($year - $user->joinedAt) + 1;
 
-    $course = $this->courseRepository->find($value);
+    $course = (object) $this->courseRepository->find($value);
 
     if (
       $course->level > $userLevel ||
