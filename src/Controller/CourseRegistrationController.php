@@ -78,7 +78,7 @@ class CourseRegistrationController extends AbstractController {
 
   #[Route('/{id}', name: 'delete', methods: ['DELETE']), JwtAuth]
   public function delete(int $id): JsonResponse {
-    $courseRegistration = $this->courseRegistrationRepository->find($id);
+    $courseRegistration = (object) $this->courseRegistrationRepository->find($id);
 
     if ($courseRegistration === null) {
       return $this->json(['error' => 'Course registration not found'], Response::HTTP_NOT_FOUND);
