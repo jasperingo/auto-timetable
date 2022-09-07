@@ -2,13 +2,24 @@
 namespace App\Controller;
 
 use function date;
+use function count;
+use function usort;
+use function array_map;
 use DateTime;
 use Exception;
 use App\Security\JwtAuth;
+use App\Entity\Course;
+use App\Entity\StaffRole;
 use App\Entity\Timetable;
+use App\Entity\Examination;
 use App\Security\VoterAction;
 use App\Dto\CreateTimetableDto;
 use App\Dto\ValidationErrorDto;
+use App\Repository\HallRepository;
+use App\Repository\StaffRepository;
+use App\Repository\CourseRepository;
+use App\Repository\TimetableRepository;
+use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +34,10 @@ class TimetableController extends AbstractController {
   public function __construct(
     private readonly ValidatorInterface $validator,
     private readonly SerializerInterface $serializer,
+    private readonly HallRepository $hallRepository,
+    private readonly StaffRepository $staffRepository,
+    private readonly CourseRepository $courseRepository,
+    private readonly TimetableRepository $timetableRepository,
   ) {}
 
   #[Route('', name: 'create', methods: ['POST']), JwtAuth]
@@ -54,8 +69,39 @@ class TimetableController extends AbstractController {
     $timetable->createdAt = new DateTime;
     $timetable->semester = $timetableDto->semester;
 
+    $halls = $this->hallRepository->findBy([], ['capacity' => 'DESC']);
+
+    $invigilators = $this->staffRepository->findBy(['role' => StaffRole::Invigilator]);
+
+    $courses = $this->courseRepository->findBy(['semester' => $timetable->semester]);
+
+    $criteria = Criteria::create()->where(Criteria::expr()->eq("session", $timetable->session));
+
+    $examinations = array_map(function(Course $course) use ($criteria) {
+      $exam = new Examination;
+      $exam->course = $course;
+      $exam->numberOfStudents = $course->courseRegistrations->matching($criteria)->count();
+      return $exam;
+    }, $courses);
+
+    usort(
+      $examinations, 
+      fn(Examination $exam1, Examination $exam2) => 
+        ($exam1->numberOfStudents === $exam2->numberOfStudents) 
+          ? 0 
+          : (($exam1->numberOfStudents < $exam2->numberOfStudents) ? 1 : -1)
+    );
+
     // TODO: COMPUTE TIMETABLE...
     
-    return $this->json(['data' => $timetable], Response::HTTP_CREATED);
+    return $this->json(
+      [
+        'data' => $timetable, 
+        'halls' => $halls,
+        'examinations' => $examinations, 
+      ], 
+      Response::HTTP_CREATED,
+      context: ['groups' => ['timetable', 'examination', 'course', 'examination_course', 'hall']]
+    );
   }
 }

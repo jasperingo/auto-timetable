@@ -42,8 +42,8 @@ class Hall {
   public ?Department $department;
 
   #[
-    OneToMany('hall', Examination::class),
-    Groups(['hall_examinations'])
+    OneToMany('hall', ExaminationHall::class),
+    Groups(['hall_examination_halls'])
   ]
-  public PersistentCollection $examinations;
+  public PersistentCollection $examinationHalls;
 }

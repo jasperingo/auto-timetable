@@ -31,6 +31,12 @@ class Examination {
 	public int $duration;
 
   #[
+		Column(type: Types::INTEGER, nullable: false),
+    Groups(['examination'])
+	]
+  public int $numberOfStudents;
+
+  #[
     Column(type: Types::DATETIME_MUTABLE, nullable: false),
     Groups(['examination'])
   ]
@@ -44,18 +50,17 @@ class Examination {
   public Timetable $timetable;
 
   #[
-    JoinColumn('hallId'),
-    ManyToOne(Hall::class, fetch: 'EAGER', inversedBy: 'examinations'),
-    Groups(['examination_hall'])
-  ]
-  public Hall $hall;
-
-  #[
     JoinColumn('courseId'),
     ManyToOne(Course::class, fetch: 'EAGER', inversedBy: 'examinations'),
     Groups(['examination_course'])
   ]
   public Course $course;
+
+  #[
+    OneToMany('examination', ExaminationHall::class),
+    Groups(['examination_halls'])
+  ]
+  public PersistentCollection $halls;
 
   #[
     OneToMany('examination', ExaminationInvigilator::class),
