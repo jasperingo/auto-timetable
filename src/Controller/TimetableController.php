@@ -22,6 +22,7 @@ use App\Repository\HallRepository;
 use App\Repository\StaffRepository;
 use App\Repository\CourseRepository;
 use App\Repository\TimetableRepository;
+use App\Repository\ExaminationRepository;
 use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,6 +43,7 @@ class TimetableController extends AbstractController {
     private readonly StaffRepository $staffRepository,
     private readonly CourseRepository $courseRepository,
     private readonly TimetableRepository $timetableRepository,
+    private readonly ExaminationRepository $examinationRepository,
   ) {}
 
   #[Route('', name: 'create', methods: ['POST']), JwtAuth]
@@ -151,5 +153,74 @@ class TimetableController extends AbstractController {
         ]
       ]
     );
-  } 
+  }
+
+  #[
+    Route('/{id}', name: 'read', requirements: ['id' => '\d+'], methods: ['GET']),
+    JwtAuth
+  ]
+  public function read(int $id): JsonResponse {
+    $timetable = $this->timetableRepository->find($id);
+
+    if ($timetable === null) {
+      return $this->json(['error' => 'Timetable not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    return $this->json(
+      ['data' => $timetable],
+      context: ['groups' => [
+          'timetable', 
+          'timetable_examinations', 
+          'examination', 
+          'examination_course', 
+          'course'
+        ]
+      ]
+    );
+  }
+
+  #[
+    Route(
+      '/examination/{id}', 
+      name: 'read_examination', 
+      requirements: ['id' => '\d+'], 
+      methods: ['GET']
+    ),
+    JwtAuth
+  ]
+  public function readExamination(int $id): JsonResponse {
+    $examination = $this->examinationRepository->find($id);
+
+    if ($examination === null) {
+      return $this->json(['error' => 'Examination not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    return $this->json(
+      ['data' => $examination],
+      context: ['groups' => [
+          'examination', 
+          'examination_course', 
+          'course',
+          'examination_halls',
+          'examination_hall',
+          'examination_hall_hall',
+          'hall',
+          'examination_invigilators',
+          'examination_invigilator',
+          'examination_invigilator_staff',
+          'staff'
+        ]
+      ]
+    );
+  }
+
+  #[Route('', name: 'read_many', methods: ['GET']), JwtAuth]
+  public function readMany(): JsonResponse {
+    $timetables = $this->timetableRepository->findAll();
+
+    return $this->json(
+      ['data' => $timetables],
+      context: ['groups' => ['timetable']]
+    );
+  }
 }
