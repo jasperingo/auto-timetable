@@ -1,6 +1,7 @@
 <?php
 namespace App\Entity;
 
+use DateTime;
 use App\Repository\ExaminationRepository;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
@@ -60,11 +61,11 @@ class Examination {
     OneToMany('examination', ExaminationHall::class),
     Groups(['examination_halls'])
   ]
-  public PersistentCollection $halls;
+  public PersistentCollection | array $halls;
 
   #[
     OneToMany('examination', ExaminationInvigilator::class),
     Groups(['examination_invigilators'])
   ]
-  public PersistentCollection $invigilators;
+  public PersistentCollection | array $invigilators;
 }

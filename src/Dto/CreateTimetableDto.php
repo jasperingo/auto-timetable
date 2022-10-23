@@ -13,4 +13,10 @@ class CreateTimetableDto {
     ]),
   ])]
   public ?Semester $semester = null;
+
+  #[Constraints\Sequentially([
+    new Constraints\NotBlank,
+    new Constraints\Date,
+  ])]
+  public ?string $startAt = null;
 }

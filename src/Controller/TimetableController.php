@@ -8,13 +8,16 @@ use function array_map;
 use DateTime;
 use Exception;
 use App\Security\JwtAuth;
+use App\Entity\Hall;
 use App\Entity\Course;
 use App\Entity\StaffRole;
 use App\Entity\Timetable;
 use App\Entity\Examination;
+use App\Entity\ExaminationHall;
 use App\Security\VoterAction;
 use App\Dto\CreateTimetableDto;
 use App\Dto\ValidationErrorDto;
+use App\Service\TimetableService;
 use App\Repository\HallRepository;
 use App\Repository\StaffRepository;
 use App\Repository\CourseRepository;
@@ -34,6 +37,7 @@ class TimetableController extends AbstractController {
   public function __construct(
     private readonly ValidatorInterface $validator,
     private readonly SerializerInterface $serializer,
+    private readonly TimetableService $timetableService,
     private readonly HallRepository $hallRepository,
     private readonly StaffRepository $staffRepository,
     private readonly CourseRepository $courseRepository,
@@ -80,6 +84,8 @@ class TimetableController extends AbstractController {
     $examinations = array_map(function(Course $course) use ($criteria) {
       $exam = new Examination;
       $exam->course = $course;
+      $exam->halls = [];
+      $exam->invigilators = [];
       $exam->numberOfStudents = $course->courseRegistrations->matching($criteria)->count();
       return $exam;
     }, $courses);
@@ -92,16 +98,58 @@ class TimetableController extends AbstractController {
           : (($exam1->numberOfStudents < $exam2->numberOfStudents) ? 1 : -1)
     );
 
+    foreach($examinations as $examination) {
+      $examCapacityVacancy = $this->timetableService->getExamCapacityVacancy($examination);
+
+      if ($examCapacityVacancy <= 0) {
+        continue;
+      }
+
+      foreach($halls as $hall) {
+        error_log($examCapacityVacancy);
+
+        if ($examCapacityVacancy <= 0) {
+          break;
+        }
+        
+        $hallVacancy = $this->timetableService->getHallVacancy($hall, $examinations);
+        
+        if ($hallVacancy <= 0) {
+          continue;
+        } else {
+          $examHall = new ExaminationHall;
+          $examHall->hall = $hall;
+          $examHall->capacity = ($hallVacancy >= $examCapacityVacancy) 
+            ? $examCapacityVacancy 
+            : $hallVacancy;
+          
+          $examCapacityVacancy -= $examHall->capacity;
+
+          $examination->halls[] = $examHall;
+        }
+      }
+    }
+
     // TODO: COMPUTE TIMETABLE...
     
     return $this->json(
       [
         'data' => $timetable, 
-        'halls' => $halls,
+        // 'halls' => $halls,
         'examinations' => $examinations, 
       ], 
       Response::HTTP_CREATED,
-      context: ['groups' => ['timetable', 'examination', 'course', 'examination_course', 'hall']]
+      context: ['groups' => [
+        'timetable', 
+        'examination', 
+        'course', 
+        'examination_course', 
+        'examination_halls', 
+        'examination_hall',
+        'examination_hall_hall',
+        'hall',
+        ]
+      ]
     );
-  }
+  } 
 }
