@@ -4,11 +4,12 @@ namespace App\Controller;
 use App\Entity\Analysis;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
-use App\Repository\StaffRepository;
-use App\Repository\DepartmentRepository;
-use App\Repository\StudentRepository;
-use App\Repository\CourseRepository;
 use App\Repository\HallRepository;
+use App\Repository\StaffRepository;
+use App\Repository\CourseRepository;
+use App\Repository\StudentRepository;
+use App\Repository\DepartmentRepository;
+use App\Repository\TimetableRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,6 +21,7 @@ class AnalysisController extends AbstractController {
     private readonly StaffRepository $staffRepository,
     private readonly CourseRepository $courseRepository,
     private readonly StudentRepository $studentRepository,
+    private readonly TimetableRepository $timetableRepository,
     private readonly DepartmentRepository $departmentRepository,
   ) {}
 
@@ -37,6 +39,7 @@ class AnalysisController extends AbstractController {
     $analysis->staffs = $this->staffRepository->count([]);
     $analysis->students = $this->studentRepository->count([]);
     $analysis->departments = $this->departmentRepository->count([]);
+    $analysis->timetables = $this->timetableRepository->count([]);
 
     return $this->json(['data' => $analysis]);
   }

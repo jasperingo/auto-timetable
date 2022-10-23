@@ -11,4 +11,6 @@ class Analysis {
   public int $staffs;
 
   public int $departments;
+
+  public int $timetables;
 }
