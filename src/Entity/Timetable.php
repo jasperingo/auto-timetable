@@ -45,5 +45,5 @@ class Timetable {
     OneToMany('timetable', Examination::class),
     Groups(['timetable_examinations'])
   ]
-  public PersistentCollection $examinations;
+  public PersistentCollection | array $examinations;
 }

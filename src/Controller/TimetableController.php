@@ -9,6 +9,8 @@ use DateTime;
 use Exception;
 use App\Security\JwtAuth;
 use App\Entity\Hall;
+use App\Entity\Staff;
+use App\Entity\Student;
 use App\Entity\Course;
 use App\Entity\StaffRole;
 use App\Entity\Timetable;
@@ -159,8 +161,18 @@ class TimetableController extends AbstractController {
     Route('/{id}', name: 'read', requirements: ['id' => '\d+'], methods: ['GET']),
     JwtAuth
   ]
-  public function read(int $id): JsonResponse {
-    $timetable = $this->timetableRepository->find($id);
+  public function read(int $id, Request $request): JsonResponse {
+    $user = $this->getUser();
+
+    $filter = $request->query->get('filter');
+  
+    if ($filter === 'personal' && $user instanceof Student) {
+      $timetable = $this->timetableRepository->findAllByExaminationAndCourseRegisteredByStudent($id, $user->id);
+    } elseif ($filter === 'personal' && $user instanceof Staff && $user->role === StaffRole::Invigilator) {
+      $timetable = $this->timetableRepository->findAllByExaminationAndInvigilator($id, $user->id);
+    } else {
+      $timetable = $this->timetableRepository->find($id);
+    }
 
     if ($timetable === null) {
       return $this->json(['error' => 'Timetable not found'], Response::HTTP_NOT_FOUND);
@@ -181,7 +193,7 @@ class TimetableController extends AbstractController {
 
   #[
     Route(
-      '/examination/{id}', 
+      '/examinations/{id}', 
       name: 'read_examination', 
       requirements: ['id' => '\d+'], 
       methods: ['GET']
@@ -205,10 +217,13 @@ class TimetableController extends AbstractController {
           'examination_hall',
           'examination_hall_hall',
           'hall',
+          'hall_department',
           'examination_invigilators',
           'examination_invigilator',
           'examination_invigilator_staff',
-          'staff'
+          'staff',
+          'staff_department',
+          'department'
         ]
       ]
     );
