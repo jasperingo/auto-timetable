@@ -1,11 +1,11 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Student;
 use function date;
 use Exception;
 use App\Dto\ValidationErrorDto;
 use App\Dto\CreateCourseRegistrationDto;
+use App\Entity\Student;
 use App\Entity\CourseRegistration;
 use App\Repository\CourseRepository;
 use App\Repository\StudentRepository;

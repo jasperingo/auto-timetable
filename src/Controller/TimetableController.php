@@ -25,6 +25,7 @@ use App\Repository\StaffRepository;
 use App\Repository\CourseRepository;
 use App\Repository\TimetableRepository;
 use App\Repository\ExaminationRepository;
+use App\Repository\CourseRegistrationRepository;
 use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,6 +47,7 @@ class TimetableController extends AbstractController {
     private readonly CourseRepository $courseRepository,
     private readonly TimetableRepository $timetableRepository,
     private readonly ExaminationRepository $examinationRepository,
+    private readonly CourseRegistrationRepository $courseRegistrationRepository,
   ) {}
 
   #[Route('', name: 'create', methods: ['POST']), JwtAuth]
@@ -203,6 +205,13 @@ class TimetableController extends AbstractController {
   public function readExamination(int $id): JsonResponse {
     $examination = $this->examinationRepository->find($id);
 
+    $examination->course->courseRegistrations = $this->getUser() instanceof Staff 
+      ? $this->courseRegistrationRepository->findAllBySessionAndCourseId(
+          $examination->timetable->session,
+          $examination->course->id
+        )
+      : [];
+    
     if ($examination === null) {
       return $this->json(['error' => 'Examination not found'], Response::HTTP_NOT_FOUND);
     }
@@ -213,6 +222,10 @@ class TimetableController extends AbstractController {
           'examination', 
           'examination_course', 
           'course',
+          'course_registrations',
+          'course_registration',
+          'course_registration_student',
+          'student',
           'examination_halls',
           'examination_hall',
           'examination_hall_hall',

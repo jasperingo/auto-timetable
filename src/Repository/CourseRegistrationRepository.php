@@ -35,6 +35,21 @@ class CourseRegistrationRepository extends ServiceEntityRepository {
     return $courseRegistration !== null;
   }
 
+  public function findAllBySessionAndCourseId(
+    $session,
+    $courseId
+  ) {
+    return $this->getEntityManager()->createQueryBuilder()
+      ->select('cr')
+      ->from(CourseRegistration::class, 'cr')
+      ->Where('cr.session = ?1')
+      ->andWhere('cr.course = ?2')
+      ->setParameter(1, $session)
+      ->setParameter(2, $courseId)
+      ->getQuery()
+      ->getResult();
+  }
+
   public function findAllBySessionAndSemester(
     $session,
     $semester
