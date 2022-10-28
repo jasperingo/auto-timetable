@@ -156,37 +156,4 @@ class StudentController extends AbstractController {
       context: ['groups' => ['student', 'student_department', 'department']]
     );
   }
-  
-  #[
-    Route(
-      '/{id}/course-registrations',
-      name: 'read_many_course_registrations',
-      requirements: ['id' => '\d+'],
-      methods: ['GET'],
-    ),
-    JwtAuth
-  ]
-  public function readManyCourseRegistrations(Request $request, int $id): JsonResponse {
-    $student = $this->studentRepository->find($id);
-
-    if ($student === null) {
-      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
-    }
-
-    $courseRegistration = new CourseRegistration;
-    $courseRegistration->student = $student;
-
-    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, $courseRegistration);
-
-    $courseRegistrations = $this->courseRegistrationRepository->findAllByStudentIdAndSessionAndSemester(
-      $student->id,
-      $request->query->get('session'),
-      $request->query->get('semester'),
-    );
-
-    return $this->json(
-      ['data' => $courseRegistrations],
-      context: ['groups' => ['course_registration', 'course_registration_course', 'course']]
-    );
-  }
 }
