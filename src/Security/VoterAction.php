@@ -7,5 +7,4 @@ class VoterAction {
   const DELETE = 'DELETE';
   const READ = 'READ';
   const READ_MANY = 'READ_MANY';
-  const READ_MANY_COURSES = 'READ_MANY_COURSES';
 }

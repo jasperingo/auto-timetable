@@ -25,6 +25,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
 class JwtAuthenticator extends AbstractAuthenticator {
+
+  private bool $optional = false;
+
   public function __construct(
     private readonly JwtService $jwtService,
     private readonly StaffRepository $staffRepository,
@@ -34,6 +37,12 @@ class JwtAuthenticator extends AbstractAuthenticator {
   public function supports(Request $request): ?bool {
     try {
       $controller = new ReflectionMethod($request->attributes->get('_controller'));
+
+      if (count($controller->getAttributes(JwtOptionalAuth::class)) > 0) {
+        $this->optional = true;
+        return true;
+      }
+
       return count($controller->getAttributes(JwtAuth::class)) > 0;
     } catch (ReflectionException) {
       throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -77,9 +86,14 @@ class JwtAuthenticator extends AbstractAuthenticator {
   }
 
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
+    if ($this->optional) {
+      return null;
+    }
+
     $data = [
       'error' => strtr($exception->getMessageKey(), $exception->getMessageData())
     ];
+    
     return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
   }
 }

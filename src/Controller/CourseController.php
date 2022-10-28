@@ -2,14 +2,17 @@
 namespace App\Controller;
 
 use Exception;
+use App\Entity\Student;
 use App\Entity\Course;
 use App\Security\JwtAuth;
 use App\Security\VoterAction;
+use App\Security\JwtOptionalAuth;
 use App\Dto\UpdateCourseDto;
 use App\Dto\CreateCourseDto;
 use App\Dto\ValidationErrorDto;
 use App\Repository\CourseRepository;
 use App\Repository\DepartmentRepository;
+use App\Repository\CourseRegistrationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +29,7 @@ class CourseController extends AbstractController {
     private readonly SerializerInterface $serializer,
     private readonly CourseRepository $courseRepository,
     private readonly DepartmentRepository $departmentRepository,
+    private readonly CourseRegistrationRepository $courseRegistrationRepository,
   ) {}
 
   #[Route('', name: 'create', methods: ['POST']), JwtAuth]
@@ -126,8 +130,50 @@ class CourseController extends AbstractController {
     );
   }
 
-  #[Route('', name: 'read_many', methods: ['GET'])]
+  #[Route('', name: 'read_many', methods: ['GET']), JwtOptionalAuth]
   public function readMany(Request $request): JsonResponse {
+    $user = $this->getUser();
+
+    if ($user instanceof Student) {
+
+      $year = (int) date('Y');
+
+      $studentLevel = ($year - $user->joinedAt) + 1;
+
+      $level = $request->query->get('level');
+      $semester = $request->query->get('semester');
+      $departmentId = $request->query->get('departmentId');
+
+      $courses = $this->courseRepository->findAllByStudentLevelAndDepartmentIdAndLevelAndSemester(
+        $studentLevel,
+        $level,
+        $semester,
+        $departmentId,
+      );
+      
+      foreach ($courses as $course) {
+        $courseRegistration = $this->courseRegistrationRepository->findOneBy([
+          'student' => $user->id, 
+          'course' => $course->id, 
+          'session' => $year
+        ]);
+
+        $course->courseRegistrations = empty($courseRegistration) ? [] : [$courseRegistration];
+      }
+
+      return $this->json(
+        ['data' => $courses],
+          context: ['groups' => [
+            'course', 
+            'course_department', 
+            'department', 
+            'course_registrations', 
+            'course_registration'
+          ]
+        ]
+      );
+    }
+  
     $semester = $request->query->get('semester');
 
     $departmentId = $request->query->get('departmentId');

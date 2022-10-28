@@ -156,57 +156,7 @@ class StudentController extends AbstractController {
       context: ['groups' => ['student', 'student_department', 'department']]
     );
   }
-
-  #[
-    Route('/{id}/courses', name: 'read_many_courses', requirements: ['id' => '\d+'], methods: ['GET']),
-    JwtAuth
-  ]
-  public function readManyCourses(Request $request, int $id): JsonResponse {
-    $student = $this->studentRepository->find($id);
-
-    if ($student === null) {
-      return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
-    }
-
-    $this->denyAccessUnlessGranted(VoterAction::READ_MANY_COURSES, $student);
-
-    $year = (int) date('Y');
-
-    $studentLevel = ($year - $student->joinedAt) + 1;
-
-    $level = $request->query->get('level');
-    $semester = $request->query->get('semester');
-    $departmentId = $request->query->get('departmentId');
-
-    $courses = $this->courseRepository->findAllByStudentLevelAndDepartmentIdAndLevelAndSemester(
-      $studentLevel,
-      $level,
-      $semester,
-      $departmentId,
-    );
-    
-    foreach ($courses as $course) {
-      $courseRegistration = $this->courseRegistrationRepository->findOneBy([
-        'student' => $student->id, 
-        'course' => $course->id, 
-        'session' => $year
-      ]);
-
-      $course->courseRegistrations = empty($courseRegistration) ? [] : [$courseRegistration];
-    }
-
-    return $this->json(
-      ['data' => $courses],
-      context: ['groups' => [
-        'course', 
-        'course_department', 
-        'department', 
-        'course_registrations', 
-        'course_registration'
-      ]]
-    );
-  }
-
+  
   #[
     Route(
       '/{id}/course-registrations',
