@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Student;
 use function date;
 use Exception;
 use App\Dto\ValidationErrorDto;
@@ -98,5 +99,28 @@ class CourseRegistrationController extends AbstractController {
     $this->courseRegistrationRepository->delete($courseRegistration);
 
     return $this->json(null, Response::HTTP_NO_CONTENT);
+  }
+
+  #[Route('', name: 'read_many', methods: ['GET']), JwtAuth]
+  public function readManyCourseRegistrations(Request $request): JsonResponse {
+    $this->denyAccessUnlessGranted(VoterAction::READ_MANY, new CourseRegistration);
+
+    $user = $this->getUser();
+
+    $courseRegistrations = $user instanceof Student 
+      ? $this->courseRegistrationRepository->findAllByStudentIdAndSessionAndSemester(
+          $this->getUser()->id,
+          $request->query->get('session'),
+          $request->query->get('semester'),
+        )
+      : $this->courseRegistrationRepository->findAllBySessionAndSemester(
+          $request->query->get('session'),
+          $request->query->get('semester'),
+      );
+
+    return $this->json(
+      ['data' => $courseRegistrations],
+      context: ['groups' => ['course_registration', 'course_registration_course', 'course']]
+    );
   }
 }

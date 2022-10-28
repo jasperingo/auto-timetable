@@ -31,16 +31,7 @@ class CourseRegistrationVoter extends Voter {
       return true;
     }
 
-    if (
-      $attribute === VoterAction::READ_MANY &&
-      (
-        $user instanceof Staff ||
-        (
-          $user instanceof Student &&
-          $user->id === $subject->student->id
-        )
-      )
-    ) {
+    if ($attribute === VoterAction::READ_MANY) {
       return true;
     }
 
