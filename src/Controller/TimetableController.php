@@ -226,6 +226,7 @@ class TimetableController extends AbstractController {
           'course_registration',
           'course_registration_student',
           'student',
+          'student_department',
           'examination_halls',
           'examination_hall',
           'examination_hall_hall',
